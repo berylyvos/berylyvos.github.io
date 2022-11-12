@@ -1,1 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh"><title type="text">Shingognix's Blog</title><subtitle type="html">MemE is a powerful and highly customizable GoHugo theme for personal blogs.</subtitle><updated>2022-11-12T18:33:37+00:00</updated><id>https://berylyvos.github.io/</id><link rel="alternate" type="text/html" href="https://berylyvos.github.io/"/><link rel="self" type="application/atom+xml" href="https://berylyvos.github.io/atom.xml"/><author><name>reuixiy</name><uri>https://berylyvos.github.io/</uri><email>reuixiy@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</rights><generator uri="https://gohugo.io/" version="0.104.3">Hugo</generator></feed>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh"><title type="text">Shingognix's Blog</title><subtitle type="html">MemE is a powerful and highly customizable GoHugo theme for personal blogs.</subtitle><updated>2022-11-12T18:37:51+00:00</updated><id>https://berylyvos.github.io/</id><link rel="alternate" type="text/html" href="https://berylyvos.github.io/"/><link rel="self" type="application/atom+xml" href="https://berylyvos.github.io/atom.xml"/><author><name>reuixiy</name><uri>https://berylyvos.github.io/</uri><email>reuixiy@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</rights><generator uri="https://gohugo.io/" version="0.104.3">Hugo</generator><entry><title type="text">Hello World</title><link rel="alternate" type="text/html" href="https://berylyvos.github.io/posts/hello-world/"/><id>https://berylyvos.github.io/posts/hello-world/</id><updated>2022-11-12T18:37:47+00:00</updated><published>2022-11-13T01:38:56+08:00</published><author><name>reuixiy</name><uri>https://io-oi.me/</uri><email>reuixiy@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)</rights><summary type="html">Hello, 1 2 3 4 5 6 7 package main import &amp;#34;fmt&amp;#34; func main() { fmt.Println(&amp;#34;hello&amp;#34;) }</summary><content type="html">&lt;h1 id="hello">Hello,&lt;/h1>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">package&lt;/span> &lt;span class="nx">main&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kn">import&lt;/span> &lt;span class="s">&amp;#34;fmt&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kd">func&lt;/span> &lt;span class="nf">main&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">fmt&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Println&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;hello&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div></content></entry></feed>
