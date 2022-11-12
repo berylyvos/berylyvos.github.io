@@ -1,1 +1,1 @@
-# berylyvos.github.io
+[berylyvos.icu](https://berylyvos.icu)
