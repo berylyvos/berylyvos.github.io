@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>void kernel</title><link>https://berylyvos.icu/</link><description>MemE 是一个强大且可高度定制的 GoHugo 博客主题，专为个人博客设计。</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (berylyvos)</managingEditor><webMaster>berylyvos@gmail.com (berylyvos)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Sun, 13 Nov 2022 15:50:51 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>Hello World</title><link>https://berylyvos.icu/posts/hello-world/</link><guid isPermaLink="true">https://berylyvos.icu/posts/hello-world/</guid><pubDate>Fri, 11 Nov 2022 01:38:56 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="hello">Hello&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>void kernel</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's fucking blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (berylyvos)</managingEditor><webMaster>berylyvos@gmail.com (berylyvos)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Sun, 13 Nov 2022 16:17:37 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>void kernel</title><link>https://berylyvos.icu/posts/hello-world/</link><guid isPermaLink="true">https://berylyvos.icu/posts/hello-world/</guid><pubDate>Fri, 11 Nov 2022 01:38:56 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="hello">Hello&lt;/h1>
 &lt;hr>
 &lt;p>Okay,&lt;br>
 this is Crazy.&lt;/p>
@@ -19,7 +19,7 @@ this is Crazy.&lt;/p>
 &lt;/div>
 &lt;/div>&lt;h2 id="good">Good&lt;/h2>
 &lt;h3 id="-2147483648">-2147483648&lt;/h3>
-&lt;h4 id="贪心单调栈on">（贪心，单调栈）$$O(n)$$&lt;/h4>
+&lt;h4 id="贪心单调栈on">（贪心，单调栈）$O(n)$&lt;/h4>
 &lt;div class="highlight">&lt;div class="chroma">
 &lt;table class="lntable">&lt;tr>&lt;td class="lntd">
 &lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
@@ -71,4 +71,4 @@ this is Crazy.&lt;/p>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
 &lt;/div>
 &lt;/div>&lt;h2 id="bye">Bye&lt;/h2>
-&lt;p>&lt;img src="https://berylyvos.icu/img/yojouhan_cover.png" alt="yojouhan">&lt;/p></description><category domain="https://berylyvos.icu/categories/void/">void</category><category domain="https://berylyvos.icu/tags/c-/">C++</category><category domain="https://berylyvos.icu/tags/%E7%AE%97%E6%B3%95/">算法</category><category domain="https://berylyvos.icu/tags/hello-world/">Hello World</category></item></channel></rss>
+&lt;p>&lt;img src="https://berylyvos.icu/img/yojouhan_cover.png" alt="yojouhan">&lt;/p></description><category domain="https://berylyvos.icu/categories/void/">void</category><category domain="https://berylyvos.icu/tags/c-/">C++</category><category domain="https://berylyvos.icu/tags/bf/">bf</category><category domain="https://berylyvos.icu/tags/%E7%AE%97%E6%B3%95/">算法</category><category domain="https://berylyvos.icu/tags/void-kernel/">void kernel</category></item></channel></rss>
