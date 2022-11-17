@@ -1,19 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>void kernel</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (berylyvos)</managingEditor><webMaster>berylyvos@gmail.com (berylyvos)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Thu, 17 Nov 2022 04:03:43 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>void kernel</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (berylyvos)</managingEditor><webMaster>berylyvos@gmail.com (berylyvos)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Thu, 17 Nov 2022 10:01:12 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
 &lt;ul>
 &lt;li>单文件torrent下载&lt;/li>
-&lt;li>支持磁力链接&lt;/li>
+&lt;li>&lt;del>支持磁力链接&lt;/del>&lt;/li>
 &lt;/ul>
-&lt;h1 id="实现原理">实现原理&lt;/h1>
-&lt;h2 id="找到peers">找到peers&lt;/h2>
+&lt;h1 id="实现">实现&lt;/h1>
+&lt;hr>
+&lt;h2 id="找peers">找peers&lt;/h2>
+&lt;h3 id="bencode协议">Bencode协议&lt;/h3>
 &lt;h3 id="解析torrent文件">解析.torrent文件&lt;/h3>
-&lt;h3 id="从tracker获取peer信息">从tracker获取peer信息&lt;/h3>
+&lt;h3 id="从tracker获取peers信息">从tracker获取peers信息&lt;/h3>
 &lt;h2 id="下载">下载&lt;/h2>
 &lt;h3 id="tcp连接与bittorrent握手">TCP连接与BitTorrent握手&lt;/h3>
 &lt;h3 id="与peers交换信息">与peers交换信息&lt;/h3>
 &lt;h3 id="并发控制">并发控制&lt;/h3>
 &lt;h1 id="参考">参考&lt;/h1>
+&lt;hr>
 &lt;ul>
-&lt;li>&lt;a href="https://www.bittorrent.org/beps/bep_0003.html">Bittorrent官方文档&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://www.bittorrent.org/beps/bep_0003.html">BEP-3: The BitTorrent Protocol Specification&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://wiki.theory.org/BitTorrentSpecification">Bittorrent Protocol Specification v1.0&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://github.com/archeryue/go-torrent">A toy torrent client written in golang&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://blog.jse.li/posts/torrent">Building a BitTorrent client from the ground up in Go&lt;/a>&lt;/li>
