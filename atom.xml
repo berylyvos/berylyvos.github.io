@@ -1,38 +1,23 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN"><title type="text">void kernel</title><subtitle type="html">This is Shigo Gnix's no interest blog.</subtitle><updated>2022-11-17T03:37:41+00:00</updated><id>https://berylyvos.icu/</id><link rel="alternate" type="text/html" href="https://berylyvos.icu/"/><link rel="self" type="application/atom+xml" href="https://berylyvos.icu/atom.xml"/><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><generator uri="https://gohugo.io/" version="0.104.3">Hugo</generator><entry><title type="text">做个BitTorrent客户端玩具</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/gorrent/"/><id>https://berylyvos.icu/posts/gorrent/</id><updated>2022-11-17T03:37:38+00:00</updated><published>2022-11-17T11:15:54+08:00</published><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">Features Only single file torrent is supported Do not support upload Do not support DHT How it Works Find peers parse a .torrent file retrieve peers from the tracker via HTTP GET Download from peers start a TCP connection complete BitTorrent peer……</summary><content type="html">&lt;h1 id="features">Features&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN"><title type="text">void kernel</title><subtitle type="html">This is Shigo Gnix's no interest blog.</subtitle><updated>2022-11-17T04:03:43+00:00</updated><id>https://berylyvos.icu/</id><link rel="alternate" type="text/html" href="https://berylyvos.icu/"/><link rel="self" type="application/atom+xml" href="https://berylyvos.icu/atom.xml"/><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><generator uri="https://gohugo.io/" version="0.104.3">Hugo</generator><entry><title type="text">简单做个BitTorrent客户端</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/gorrent/"/><id>https://berylyvos.icu/posts/gorrent/</id><updated>2022-11-17T04:03:41+00:00</updated><published>2022-11-17T11:15:54+08:00</published><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">功能 单文件torrent下载 支持磁力链接 实现原理 找到peers 解析.torrent文……</summary><content type="html">&lt;h1 id="功能">功能&lt;/h1>
 &lt;ul>
-&lt;li>Only single file torrent is supported&lt;/li>
-&lt;li>Do not support upload&lt;/li>
-&lt;li>Do not support DHT&lt;/li>
+&lt;li>单文件torrent下载&lt;/li>
+&lt;li>支持磁力链接&lt;/li>
 &lt;/ul>
-&lt;h1 id="how-it-works">How it Works&lt;/h1>
-&lt;h2 id="find-peers">Find peers&lt;/h2>
+&lt;h1 id="实现原理">实现原理&lt;/h1>
+&lt;h2 id="找到peers">找到peers&lt;/h2>
+&lt;h3 id="解析torrent文件">解析.torrent文件&lt;/h3>
+&lt;h3 id="从tracker获取peer信息">从tracker获取peer信息&lt;/h3>
+&lt;h2 id="下载">下载&lt;/h2>
+&lt;h3 id="tcp连接与bittorrent握手">TCP连接与BitTorrent握手&lt;/h3>
+&lt;h3 id="与peers交换信息">与peers交换信息&lt;/h3>
+&lt;h3 id="并发控制">并发控制&lt;/h3>
+&lt;h1 id="参考">参考&lt;/h1>
 &lt;ul>
-&lt;li>parse a .torrent file&lt;/li>
-&lt;li>retrieve peers from the tracker via HTTP GET&lt;/li>
-&lt;/ul>
-&lt;h2 id="download-from-peers">Download from peers&lt;/h2>
-&lt;ul>
-&lt;li>start a TCP connection&lt;/li>
-&lt;li>complete BitTorrent peer protocol handshake&lt;/li>
-&lt;li>send &amp;amp; receive messages
-&lt;ul>
-&lt;li>interpreting different types of messages to download blocks from the right peers&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>put it all together
-&lt;ul>
-&lt;li>manage concurrency &amp;amp; state&lt;/li>
-&lt;li>pipelining requests&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ul>
-&lt;h1 id="references">References&lt;/h1>
-&lt;ul>
-&lt;li>&lt;a href="https://blog.jse.li/posts/torrent">https://blog.jse.li/posts/torrent&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://github.com/archeryue/go-torrent">https://github.com/archeryue/go-torrent&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://www.bittorrent.org/beps/bep_0003.html">https://www.bittorrent.org/beps/bep_0003.html&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://wiki.theory.org/BitTorrentSpecification">https://wiki.theory.org/BitTorrentSpecification&lt;/a>&lt;/li>
-&lt;/ul></content><category scheme="https://berylyvos.icu/categories/%E8%BD%AE%E5%AD%90/" term="轮子" label="轮子"/><category scheme="https://berylyvos.icu/tags/golang/" term="Golang" label="Golang"/><category scheme="https://berylyvos.icu/tags/bittorrent/" term="BitTorrent" label="BitTorrent"/></entry><entry><title type="text">void kernel</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/hello-world/"/><id>https://berylyvos.icu/posts/hello-world/</id><updated>2022-11-17T03:37:38+00:00</updated><published>2022-11-11T01:38:56+08:00</published><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">Hello Okay, this is Crazy. void kernel 1 2 3 4 ++++++++++[&amp;gt;+++++++&amp;gt;+++++++++++&amp;gt;+++&amp;lt;&amp;lt;&amp;lt;-] &amp;gt;++++++++.&amp;gt;+.&amp;gt;++.&amp;lt;&amp;lt;-------.&amp;gt;------.+++++ ++++.------.&amp;gt;.&amp;lt;&amp;lt;-.&amp;gt;+++++++++.----------- -------.++++++++.&amp;gt;.&amp;lt;&amp;lt;+++++++.&amp;gt;------.&amp;gt;+. Good -2147483648 （贪心，单调栈）$O(n)$ 1 2 3 4 5 6 7 8 9 10 11……</summary><content type="html">&lt;h1 id="hello">Hello&lt;/h1>
+&lt;li>&lt;a href="https://www.bittorrent.org/beps/bep_0003.html">Bittorrent官方文档&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://wiki.theory.org/BitTorrentSpecification">Bittorrent Protocol Specification v1.0&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/archeryue/go-torrent">A toy torrent client written in golang&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://blog.jse.li/posts/torrent">Building a BitTorrent client from the ground up in Go&lt;/a>&lt;/li>
+&lt;/ul></content><category scheme="https://berylyvos.icu/categories/%E8%BD%AE%E5%AD%90/" term="轮子" label="轮子"/><category scheme="https://berylyvos.icu/tags/golang/" term="Golang" label="Golang"/><category scheme="https://berylyvos.icu/tags/bittorrent/" term="BitTorrent" label="BitTorrent"/></entry><entry><title type="text">void kernel</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/hello-world/"/><id>https://berylyvos.icu/posts/hello-world/</id><updated>2022-11-17T04:03:41+00:00</updated><published>2022-11-11T01:38:56+08:00</published><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">Hello Okay, this is Crazy. void kernel 1 2 3 4 ++++++++++[&amp;gt;+++++++&amp;gt;+++++++++++&amp;gt;+++&amp;lt;&amp;lt;&amp;lt;-] &amp;gt;++++++++.&amp;gt;+.&amp;gt;++.&amp;lt;&amp;lt;-------.&amp;gt;------.+++++ ++++.------.&amp;gt;.&amp;lt;&amp;lt;-.&amp;gt;+++++++++.----------- -------.++++++++.&amp;gt;.&amp;lt;&amp;lt;+++++++.&amp;gt;------.&amp;gt;+. Good -2147483648 （贪心，单调栈）$O(n)$ 1 2 3 4 5 6 7 8 9 10 11……</summary><content type="html">&lt;h1 id="hello">Hello&lt;/h1>
 &lt;hr>
 &lt;p>Okay,&lt;br>
 this is Crazy.&lt;/p>

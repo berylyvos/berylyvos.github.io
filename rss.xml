@@ -1,37 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>void kernel</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (berylyvos)</managingEditor><webMaster>berylyvos@gmail.com (berylyvos)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Thu, 17 Nov 2022 03:37:41 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>做个BitTorrent客户端玩具</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="features">Features&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>void kernel</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (berylyvos)</managingEditor><webMaster>berylyvos@gmail.com (berylyvos)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Thu, 17 Nov 2022 04:03:43 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
 &lt;ul>
-&lt;li>Only single file torrent is supported&lt;/li>
-&lt;li>Do not support upload&lt;/li>
-&lt;li>Do not support DHT&lt;/li>
+&lt;li>单文件torrent下载&lt;/li>
+&lt;li>支持磁力链接&lt;/li>
 &lt;/ul>
-&lt;h1 id="how-it-works">How it Works&lt;/h1>
-&lt;h2 id="find-peers">Find peers&lt;/h2>
+&lt;h1 id="实现原理">实现原理&lt;/h1>
+&lt;h2 id="找到peers">找到peers&lt;/h2>
+&lt;h3 id="解析torrent文件">解析.torrent文件&lt;/h3>
+&lt;h3 id="从tracker获取peer信息">从tracker获取peer信息&lt;/h3>
+&lt;h2 id="下载">下载&lt;/h2>
+&lt;h3 id="tcp连接与bittorrent握手">TCP连接与BitTorrent握手&lt;/h3>
+&lt;h3 id="与peers交换信息">与peers交换信息&lt;/h3>
+&lt;h3 id="并发控制">并发控制&lt;/h3>
+&lt;h1 id="参考">参考&lt;/h1>
 &lt;ul>
-&lt;li>parse a .torrent file&lt;/li>
-&lt;li>retrieve peers from the tracker via HTTP GET&lt;/li>
-&lt;/ul>
-&lt;h2 id="download-from-peers">Download from peers&lt;/h2>
-&lt;ul>
-&lt;li>start a TCP connection&lt;/li>
-&lt;li>complete BitTorrent peer protocol handshake&lt;/li>
-&lt;li>send &amp;amp; receive messages
-&lt;ul>
-&lt;li>interpreting different types of messages to download blocks from the right peers&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>put it all together
-&lt;ul>
-&lt;li>manage concurrency &amp;amp; state&lt;/li>
-&lt;li>pipelining requests&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ul>
-&lt;h1 id="references">References&lt;/h1>
-&lt;ul>
-&lt;li>&lt;a href="https://blog.jse.li/posts/torrent">https://blog.jse.li/posts/torrent&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://github.com/archeryue/go-torrent">https://github.com/archeryue/go-torrent&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://www.bittorrent.org/beps/bep_0003.html">https://www.bittorrent.org/beps/bep_0003.html&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://wiki.theory.org/BitTorrentSpecification">https://wiki.theory.org/BitTorrentSpecification&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://www.bittorrent.org/beps/bep_0003.html">Bittorrent官方文档&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://wiki.theory.org/BitTorrentSpecification">Bittorrent Protocol Specification v1.0&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/archeryue/go-torrent">A toy torrent client written in golang&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://blog.jse.li/posts/torrent">Building a BitTorrent client from the ground up in Go&lt;/a>&lt;/li>
 &lt;/ul></description><category domain="https://berylyvos.icu/categories/%E8%BD%AE%E5%AD%90/">轮子</category><category domain="https://berylyvos.icu/tags/golang/">Golang</category><category domain="https://berylyvos.icu/tags/bittorrent/">BitTorrent</category></item><item><title>void kernel</title><link>https://berylyvos.icu/posts/hello-world/</link><guid isPermaLink="true">https://berylyvos.icu/posts/hello-world/</guid><pubDate>Fri, 11 Nov 2022 01:38:56 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="hello">Hello&lt;/h1>
 &lt;hr>
 &lt;p>Okay,&lt;br>
