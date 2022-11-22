@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>void kernel</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (berylyvos)</managingEditor><webMaster>berylyvos@gmail.com (berylyvos)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Tue, 22 Nov 2022 02:59:05 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>void kernel</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (berylyvos)</managingEditor><webMaster>berylyvos@gmail.com (berylyvos)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Tue, 22 Nov 2022 03:22:05 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
 &lt;ul>
 &lt;li>torrent下载&lt;/li>
 &lt;li>&lt;del>支持多文件&lt;/del>&lt;/li>
@@ -60,6 +60,30 @@ this is Crazy.&lt;/p>
 &lt;/div>&lt;h2 id="good">Good&lt;/h2>
 &lt;h3 id="-2147483648">-2147483648&lt;/h3>
 &lt;h4 id="acwing-291-蒙德里安的梦想httpswwwacwingcomactivitycontentproblemcontent1010">&lt;a href="https://www.acwing.com/activity/content/problem/content/1010/">AcWing 291. 蒙德里安的梦想&lt;/a>&lt;/h4>
+&lt;p>求把 $N×M$ 的棋盘分割成若干个 $1×2$ 的长方形，有多少种方案。&lt;/p>
+&lt;p>例如当 $N=2，M=4$ 时，共有 $5$ 种方案。当 $N=2，M=3$ 时，共有 $3$ 种方案。&lt;/p>
+&lt;p>&lt;img src="https://berylyvos.icu/img/mondriaan.jpeg" alt="mondriaan">&lt;/p>
+&lt;p>数据范围： $1≤N,M≤11$&lt;/p>
+&lt;p>输入样例：&lt;/p>
+&lt;pre tabindex="0">&lt;code>1 2
+1 3
+1 4
+2 2
+2 3
+2 4
+2 11
+4 11
+0 0
+&lt;/code>&lt;/pre>&lt;p>输出样例：&lt;/p>
+&lt;pre tabindex="0">&lt;code>1
+0
+1
+2
+3
+5
+144
+51205
+&lt;/code>&lt;/pre>&lt;p>代码：&lt;/p>
 &lt;div class="highlight">&lt;div class="chroma">
 &lt;table class="lntable">&lt;tr>&lt;td class="lntd">
 &lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
