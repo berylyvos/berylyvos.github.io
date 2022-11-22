@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN"><title type="text">void kernel</title><subtitle type="html">This is Shigo Gnix's no interest blog.</subtitle><updated>2022-11-22T08:58:40+00:00</updated><id>https://berylyvos.icu/</id><link rel="alternate" type="text/html" href="https://berylyvos.icu/"/><link rel="self" type="application/atom+xml" href="https://berylyvos.icu/atom.xml"/><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><generator uri="https://gohugo.io/" version="0.104.3">Hugo</generator><entry><title type="text">简单做个BitTorrent客户端</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/gorrent/"/><id>https://berylyvos.icu/posts/gorrent/</id><updated>2022-11-22T08:58:37+00:00</updated><published>2022-11-17T11:15:54+08:00</published><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">功能 torrent下载 支持多文件 支持磁力链接 实现 找peers Bencode协议 d 8:announce 41:http://bttracker.debian.org:6969/announce……</summary><content type="html">&lt;h1 id="功能">功能&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN"><title type="text">void kernel</title><subtitle type="html">This is Shigo Gnix's no interest blog.</subtitle><updated>2022-11-22T12:01:52+00:00</updated><id>https://berylyvos.icu/</id><link rel="alternate" type="text/html" href="https://berylyvos.icu/"/><link rel="self" type="application/atom+xml" href="https://berylyvos.icu/atom.xml"/><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><generator uri="https://gohugo.io/" version="0.104.3">Hugo</generator><entry><title type="text">简单做个BitTorrent客户端</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/gorrent/"/><id>https://berylyvos.icu/posts/gorrent/</id><updated>2022-11-22T12:01:48+00:00</updated><published>2022-11-17T11:15:54+08:00</published><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">功能 torrent下载 支持多文件 支持磁力链接 实现 找peers Torrent文件结构与……</summary><content type="html">&lt;h1 id="功能">功能&lt;/h1>
 &lt;ul>
 &lt;li>torrent下载&lt;/li>
 &lt;li>&lt;del>支持多文件&lt;/del>&lt;/li>
@@ -6,24 +6,44 @@
 &lt;/ul>
 &lt;h1 id="实现">实现&lt;/h1>
 &lt;h2 id="找peers">找peers&lt;/h2>
-&lt;h3 id="bencode协议">Bencode协议&lt;/h3>
+&lt;h3 id="torrent文件结构与bencode协议">Torrent文件结构与Bencode协议&lt;/h3>
 &lt;pre tabindex="0">&lt;code>d
 8:announce
-41:http://bttracker.debian.org:6969/announce
+43:udp://tracker.coppersurfer.tk:6969/announce
+13:announce-list
+l
+l43:udp://tracker.coppersurfer.tk:6969/announcee
+l49:udp://tracker.leechers-paradise.org:6969/announcee
+l38:udp://tracker.cyberia.is:6969/announcee
+...
+e
 7:comment
-35:&amp;#34;Debian CD from cdimage.debian.org&amp;#34;
+80:The.Breakfast.Club.1985.REMASTERED.720p.BluRay.999MB.HQ.x265.10bit-GalaxyRG[TGx]
 13:creation date
-i1573903810e
+i1600189812e
 4:info
 d
+5:files
+l
+d
 6:length
-i351272960e
+i1035352868e
+4:path
+l79:The.Breakfast.Club.1985.REMASTERED.720p.BluRay.999MB.HQ.x265.10bit-GalaxyRG.mkve
+e
+d
+6:length
+i678e
+4:path
+l42:[TGx]Downloaded from torrentgalaxy.to .txte
+e
+e
 4:name
-31:debian-10.2.0-amd64-netinst.iso
+80:The.Breakfast.Club.1985.REMASTERED.720p.BluRay.999MB.HQ.x265.10bit-GalaxyRG[TGx]
 12:piece length
-i262144e
+i524288e
 6:pieces
-26800:�����PS�^��
+39500:x���vģ�B�Ɇp�6��HH&amp;#34;c�`f|��� ...
 e
 e
 &lt;/code>&lt;/pre>&lt;h3 id="解析torrent文件">解析.torrent文件&lt;/h3>
@@ -38,7 +58,7 @@ e
 &lt;li>&lt;a href="https://wiki.theory.org/BitTorrentSpecification">Bittorrent Protocol Specification v1.0&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://github.com/archeryue/go-torrent">A toy torrent client written in golang&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://blog.jse.li/posts/torrent">Building a BitTorrent client from the ground up in Go&lt;/a>&lt;/li>
-&lt;/ul></content><category scheme="https://berylyvos.icu/categories/%E7%8E%A9/" term="玩" label="玩"/><category scheme="https://berylyvos.icu/tags/golang/" term="Golang" label="Golang"/><category scheme="https://berylyvos.icu/tags/bittorrent/" term="BitTorrent" label="BitTorrent"/></entry><entry><title type="text">void kernel</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/hello-world/"/><id>https://berylyvos.icu/posts/hello-world/</id><updated>2022-11-22T08:58:37+00:00</updated><published>2022-11-11T01:38:56+08:00</published><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">Hello Okay, this is Crazy. void kernel 1 2 3 4 ++++++++++[&amp;gt;+++++++&amp;gt;+++++++++++&amp;gt;+++&amp;lt;&amp;lt;&amp;lt;-] &amp;gt;++++++++.&amp;gt;+.&amp;gt;++.&amp;lt;&amp;lt;-------.&amp;gt;------.+++++ ++++.------.&amp;gt;.&amp;lt;&amp;lt;-.&amp;gt;+++++++++.----------- -------.++++++++.&amp;gt;.&amp;lt;&amp;lt;+++++++.&amp;gt;------.&amp;gt;+. Good -2147483648 AcWing 291. 蒙德里安的梦想 求把 $N×M$ 的棋盘分割成若干个……</summary><content type="html">&lt;h1 id="hello">Hello&lt;/h1>
+&lt;/ul></content><category scheme="https://berylyvos.icu/categories/%E7%8E%A9/" term="玩" label="玩"/><category scheme="https://berylyvos.icu/tags/golang/" term="Golang" label="Golang"/><category scheme="https://berylyvos.icu/tags/bittorrent/" term="BitTorrent" label="BitTorrent"/></entry><entry><title type="text">void kernel</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/hello-world/"/><id>https://berylyvos.icu/posts/hello-world/</id><updated>2022-11-22T12:01:48+00:00</updated><published>2022-11-11T01:38:56+08:00</published><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">Hello Okay, this is Crazy. void kernel 1 2 3 4 ++++++++++[&amp;gt;+++++++&amp;gt;+++++++++++&amp;gt;+++&amp;lt;&amp;lt;&amp;lt;-] &amp;gt;++++++++.&amp;gt;+.&amp;gt;++.&amp;lt;&amp;lt;-------.&amp;gt;------.+++++ ++++.------.&amp;gt;.&amp;lt;&amp;lt;-.&amp;gt;+++++++++.----------- -------.++++++++.&amp;gt;.&amp;lt;&amp;lt;+++++++.&amp;gt;------.&amp;gt;+. Good -2147483648 AcWing 291. 蒙德里安的梦想 求把 $N×M$ 的棋盘分割成若干个……</summary><content type="html">&lt;h1 id="hello">Hello&lt;/h1>
 &lt;hr>
 &lt;p>Okay,&lt;br>
 this is Crazy.&lt;/p>

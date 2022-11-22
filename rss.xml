@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>void kernel</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (berylyvos)</managingEditor><webMaster>berylyvos@gmail.com (berylyvos)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Tue, 22 Nov 2022 08:58:40 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>void kernel</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (berylyvos)</managingEditor><webMaster>berylyvos@gmail.com (berylyvos)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Tue, 22 Nov 2022 12:01:52 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
 &lt;ul>
 &lt;li>torrent下载&lt;/li>
 &lt;li>&lt;del>支持多文件&lt;/del>&lt;/li>
@@ -6,24 +6,44 @@
 &lt;/ul>
 &lt;h1 id="实现">实现&lt;/h1>
 &lt;h2 id="找peers">找peers&lt;/h2>
-&lt;h3 id="bencode协议">Bencode协议&lt;/h3>
+&lt;h3 id="torrent文件结构与bencode协议">Torrent文件结构与Bencode协议&lt;/h3>
 &lt;pre tabindex="0">&lt;code>d
 8:announce
-41:http://bttracker.debian.org:6969/announce
+43:udp://tracker.coppersurfer.tk:6969/announce
+13:announce-list
+l
+l43:udp://tracker.coppersurfer.tk:6969/announcee
+l49:udp://tracker.leechers-paradise.org:6969/announcee
+l38:udp://tracker.cyberia.is:6969/announcee
+...
+e
 7:comment
-35:&amp;#34;Debian CD from cdimage.debian.org&amp;#34;
+80:The.Breakfast.Club.1985.REMASTERED.720p.BluRay.999MB.HQ.x265.10bit-GalaxyRG[TGx]
 13:creation date
-i1573903810e
+i1600189812e
 4:info
 d
+5:files
+l
+d
 6:length
-i351272960e
+i1035352868e
+4:path
+l79:The.Breakfast.Club.1985.REMASTERED.720p.BluRay.999MB.HQ.x265.10bit-GalaxyRG.mkve
+e
+d
+6:length
+i678e
+4:path
+l42:[TGx]Downloaded from torrentgalaxy.to .txte
+e
+e
 4:name
-31:debian-10.2.0-amd64-netinst.iso
+80:The.Breakfast.Club.1985.REMASTERED.720p.BluRay.999MB.HQ.x265.10bit-GalaxyRG[TGx]
 12:piece length
-i262144e
+i524288e
 6:pieces
-26800:�����PS�^��
+39500:x���vģ�B�Ɇp�6��HH&amp;#34;c�`f|��� ...
 e
 e
 &lt;/code>&lt;/pre>&lt;h3 id="解析torrent文件">解析.torrent文件&lt;/h3>
