@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>void kernel</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (berylyvos)</managingEditor><webMaster>berylyvos@gmail.com (berylyvos)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Wed, 23 Nov 2022 10:47:59 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>void kernel</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (berylyvos)</managingEditor><webMaster>berylyvos@gmail.com (berylyvos)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Wed, 23 Nov 2022 12:09:40 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
 &lt;ul>
 &lt;li>torrent下载&lt;/li>
 &lt;li>&lt;del>支持多文件&lt;/del>&lt;/li>
@@ -67,16 +67,12 @@ e
 &lt;/ul>
 &lt;/li>
 &lt;/ul>
-&lt;p>一个torrent文件是由&lt;em>&lt;strong>infohash&lt;/strong>&lt;/em>唯一标识的，其值为整个&lt;code>info&lt;/code>的SHA-1哈希。&lt;/p>
+&lt;p>一个torrent文件是由&lt;strong>infohash&lt;/strong>唯一标识的，其值为整个&lt;code>info&lt;/code>的SHA-1哈希。&lt;/p>
 &lt;h3 id="解析torrent文件">解析torrent文件&lt;/h3>
-&lt;p>解析bencode编码的torrent文件，就是递归下降。当然，Marshal/Unmarshal的过程需要借助go的反射。&lt;/p>
-&lt;pre tabindex="0">&lt;code class="language-mermaid" data-lang="mermaid"> flowchart LR
-A[Bencode Object]-- Encode --&amp;gt;B[.torrent]
-C[TorrentFile Struct]-.- Marshal -.-&amp;gt;B
-B-- Decode --&amp;gt;A
-B-.- Unmarshal -.-&amp;gt;A
-A-.- Unmarshal -.-&amp;gt;C
-&lt;/code>&lt;/pre>&lt;h3 id="从tracker获取peers信息">从tracker获取peers信息&lt;/h3>
+&lt;p>解析bencode编码的torrent文件，本质是递归下降。当然，Marshal/Unmarshal的过程需要借助go的反射。&lt;/p>
+&lt;h3 id="从tracker获取peers信息">从tracker获取peers信息&lt;/h3>
+&lt;h4 id="http">HTTP&lt;/h4>
+&lt;h4 id="udp">UDP&lt;/h4>
 &lt;h2 id="下载">下载&lt;/h2>
 &lt;h3 id="tcp连接与bittorrent握手">TCP连接与BitTorrent握手&lt;/h3>
 &lt;h3 id="与peers交换信息">与peers交换信息&lt;/h3>
