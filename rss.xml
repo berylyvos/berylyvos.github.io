@@ -1,15 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>void kernel</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (berylyvos)</managingEditor><webMaster>berylyvos@gmail.com (berylyvos)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Wed, 23 Nov 2022 02:45:17 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>void kernel</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (berylyvos)</managingEditor><webMaster>berylyvos@gmail.com (berylyvos)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Wed, 23 Nov 2022 10:47:59 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
 &lt;ul>
 &lt;li>torrent下载&lt;/li>
 &lt;li>&lt;del>支持多文件&lt;/del>&lt;/li>
 &lt;li>&lt;del>支持磁力链接&lt;/del>&lt;/li>
 &lt;/ul>
-&lt;h1 id="实现">实现&lt;/h1>
+&lt;h1 id="golang实现">Golang实现&lt;/h1>
 &lt;h2 id="找peers">找peers&lt;/h2>
 &lt;h3 id="torrent文件结构与bencode编码">Torrent文件结构与Bencode编码&lt;/h3>
 &lt;p>一个torrent文件包含一个&lt;strong>文件列表&lt;/strong>和关于所有片段的&lt;strong>完整性元数据&lt;/strong>(integrity metadata)，并可选地包含一个很长的&lt;strong>tracker&lt;/strong>列表，并由&lt;strong>Bencode&lt;/strong>编码。&lt;/p>
 &lt;p>Bencode编码支持4种数据类型：byte string，integer，list和dictionary。&lt;/p>
-&lt;p>以电影*&lt;a href="https://www.imdb.com/title/tt0088847/">《早餐俱乐部》&lt;/a>*为例，其torrent文件结构如下所示：&lt;/p>
+&lt;p>以电影&lt;a href="https://www.imdb.com/title/tt0088847/">《早餐俱乐部》&lt;/a>为例，其torrent文件结构如下所示：&lt;/p>
 &lt;pre tabindex="0">&lt;code>d
 8:announce
 43:udp://tracker.coppersurfer.tk:6969/announce
@@ -63,13 +63,20 @@ e
 &lt;/li>
 &lt;li>&lt;code>name&lt;/code>：建议要保存的文件名（单文件）/ 建议的目录名称（多文件）&lt;/li>
 &lt;li>&lt;code>piece length&lt;/code>：文件片的大小，通常为256 KB&lt;/li>
-&lt;li>&lt;code>pieces&lt;/code>：每个文件片的二进制编码的SHA-1哈希列表（SHA-1长度为20字节，如果有多文件，则按文件字典中的顺序拼接在一起）&lt;/li>
+&lt;li>&lt;code>pieces&lt;/code>：每个文件片的二进制编码的SHA-1哈希列表（如果有多文件，则按文件字典中的顺序拼接在一起）&lt;/li>
 &lt;/ul>
 &lt;/li>
 &lt;/ul>
-&lt;p>一个torrent文件是由&lt;strong>infohash&lt;/strong>唯一标识的，其值为整个&lt;code>info&lt;/code>的SHA-1哈希。&lt;/p>
+&lt;p>一个torrent文件是由&lt;em>&lt;strong>infohash&lt;/strong>&lt;/em>唯一标识的，其值为整个&lt;code>info&lt;/code>的SHA-1哈希。&lt;/p>
 &lt;h3 id="解析torrent文件">解析torrent文件&lt;/h3>
-&lt;h3 id="从tracker获取peers信息">从tracker获取peers信息&lt;/h3>
+&lt;p>解析bencode编码的torrent文件，就是递归下降。当然，Marshal/Unmarshal的过程需要借助go的反射。&lt;/p>
+&lt;pre tabindex="0">&lt;code class="language-mermaid" data-lang="mermaid"> flowchart LR
+A[Bencode Object]-- Encode --&amp;gt;B[.torrent]
+C[TorrentFile Struct]-.- Marshal -.-&amp;gt;B
+B-- Decode --&amp;gt;A
+B-.- Unmarshal -.-&amp;gt;A
+A-.- Unmarshal -.-&amp;gt;C
+&lt;/code>&lt;/pre>&lt;h3 id="从tracker获取peers信息">从tracker获取peers信息&lt;/h3>
 &lt;h2 id="下载">下载&lt;/h2>
 &lt;h3 id="tcp连接与bittorrent握手">TCP连接与BitTorrent握手&lt;/h3>
 &lt;h3 id="与peers交换信息">与peers交换信息&lt;/h3>
