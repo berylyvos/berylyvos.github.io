@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN"><title type="text">void kernel</title><subtitle type="html">This is Shigo Gnix's no interest blog.</subtitle><updated>2022-11-22T12:01:52+00:00</updated><id>https://berylyvos.icu/</id><link rel="alternate" type="text/html" href="https://berylyvos.icu/"/><link rel="self" type="application/atom+xml" href="https://berylyvos.icu/atom.xml"/><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><generator uri="https://gohugo.io/" version="0.104.3">Hugo</generator><entry><title type="text">简单做个BitTorrent客户端</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/gorrent/"/><id>https://berylyvos.icu/posts/gorrent/</id><updated>2022-11-22T12:01:48+00:00</updated><published>2022-11-17T11:15:54+08:00</published><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">功能 torrent下载 支持多文件 支持磁力链接 实现 找peers Torrent文件结构与……</summary><content type="html">&lt;h1 id="功能">功能&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN"><title type="text">void kernel</title><subtitle type="html">This is Shigo Gnix's no interest blog.</subtitle><updated>2022-11-23T02:45:17+00:00</updated><id>https://berylyvos.icu/</id><link rel="alternate" type="text/html" href="https://berylyvos.icu/"/><link rel="self" type="application/atom+xml" href="https://berylyvos.icu/atom.xml"/><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><generator uri="https://gohugo.io/" version="0.104.3">Hugo</generator><entry><title type="text">简单做个BitTorrent客户端</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/gorrent/"/><id>https://berylyvos.icu/posts/gorrent/</id><updated>2022-11-23T02:45:15+00:00</updated><published>2022-11-17T11:15:54+08:00</published><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">功能 torrent下载 支持多文件 支持磁力链接 实现 找peers Torrent文件结构与……</summary><content type="html">&lt;h1 id="功能">功能&lt;/h1>
 &lt;ul>
 &lt;li>torrent下载&lt;/li>
 &lt;li>&lt;del>支持多文件&lt;/del>&lt;/li>
@@ -6,7 +6,10 @@
 &lt;/ul>
 &lt;h1 id="实现">实现&lt;/h1>
 &lt;h2 id="找peers">找peers&lt;/h2>
-&lt;h3 id="torrent文件结构与bencode协议">Torrent文件结构与Bencode协议&lt;/h3>
+&lt;h3 id="torrent文件结构与bencode编码">Torrent文件结构与Bencode编码&lt;/h3>
+&lt;p>一个torrent文件包含一个&lt;strong>文件列表&lt;/strong>和关于所有片段的&lt;strong>完整性元数据&lt;/strong>(integrity metadata)，并可选地包含一个很长的&lt;strong>tracker&lt;/strong>列表，并由&lt;strong>Bencode&lt;/strong>编码。&lt;/p>
+&lt;p>Bencode编码支持4种数据类型：byte string，integer，list和dictionary。&lt;/p>
+&lt;p>以电影*&lt;a href="https://www.imdb.com/title/tt0088847/">《早餐俱乐部》&lt;/a>*为例，其torrent文件结构如下所示：&lt;/p>
 &lt;pre tabindex="0">&lt;code>d
 8:announce
 43:udp://tracker.coppersurfer.tk:6969/announce
@@ -46,7 +49,26 @@ i524288e
 39500:x���vģ�B�Ɇp�6��HH&amp;#34;c�`f|��� ...
 e
 e
-&lt;/code>&lt;/pre>&lt;h3 id="解析torrent文件">解析.torrent文件&lt;/h3>
+&lt;/code>&lt;/pre>&lt;p>在这个字典中，所有键和字符串类型值的结构都是&lt;code>length:xxx&lt;/code>，整型表示为&lt;code>ixxxe&lt;/code>，列表为&lt;code>l[]...[]e&lt;/code>，字典为&lt;code>d(key:[])...(key:[])e&lt;/code>，其中，&lt;code>[]&lt;/code>可以为四种类型的任意一种。&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>announce&lt;/code>：tracker的URL&lt;/li>
+&lt;li>&lt;code>announce-list&lt;/code>：tracker的URL列表（可选）&lt;/li>
+&lt;li>&lt;code>info&lt;/code>：包含文件共享信息的字典
+&lt;ul>
+&lt;li>&lt;code>files&lt;/code>：文件字典列表（仅当共享多个文件时）
+&lt;ul>
+&lt;li>&lt;code>length&lt;/code>：文件的大小，以字节为单位&lt;/li>
+&lt;li>&lt;code>path&lt;/code>：与子目录名称对应的字符串列表，其中最后一个是实际的文件名&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;code>name&lt;/code>：建议要保存的文件名（单文件）/ 建议的目录名称（多文件）&lt;/li>
+&lt;li>&lt;code>piece length&lt;/code>：文件片的大小，通常为256 KB&lt;/li>
+&lt;li>&lt;code>pieces&lt;/code>：每个文件片的二进制编码的SHA-1哈希列表（SHA-1长度为20字节，如果有多文件，则按文件字典中的顺序拼接在一起）&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>一个torrent文件是由&lt;strong>infohash&lt;/strong>唯一标识的，其值为整个&lt;code>info&lt;/code>的SHA-1哈希。&lt;/p>
+&lt;h3 id="解析torrent文件">解析torrent文件&lt;/h3>
 &lt;h3 id="从tracker获取peers信息">从tracker获取peers信息&lt;/h3>
 &lt;h2 id="下载">下载&lt;/h2>
 &lt;h3 id="tcp连接与bittorrent握手">TCP连接与BitTorrent握手&lt;/h3>
@@ -58,7 +80,7 @@ e
 &lt;li>&lt;a href="https://wiki.theory.org/BitTorrentSpecification">Bittorrent Protocol Specification v1.0&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://github.com/archeryue/go-torrent">A toy torrent client written in golang&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://blog.jse.li/posts/torrent">Building a BitTorrent client from the ground up in Go&lt;/a>&lt;/li>
-&lt;/ul></content><category scheme="https://berylyvos.icu/categories/%E7%8E%A9/" term="玩" label="玩"/><category scheme="https://berylyvos.icu/tags/golang/" term="Golang" label="Golang"/><category scheme="https://berylyvos.icu/tags/bittorrent/" term="BitTorrent" label="BitTorrent"/></entry><entry><title type="text">void kernel</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/hello-world/"/><id>https://berylyvos.icu/posts/hello-world/</id><updated>2022-11-22T12:01:48+00:00</updated><published>2022-11-11T01:38:56+08:00</published><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">Hello Okay, this is Crazy. void kernel 1 2 3 4 ++++++++++[&amp;gt;+++++++&amp;gt;+++++++++++&amp;gt;+++&amp;lt;&amp;lt;&amp;lt;-] &amp;gt;++++++++.&amp;gt;+.&amp;gt;++.&amp;lt;&amp;lt;-------.&amp;gt;------.+++++ ++++.------.&amp;gt;.&amp;lt;&amp;lt;-.&amp;gt;+++++++++.----------- -------.++++++++.&amp;gt;.&amp;lt;&amp;lt;+++++++.&amp;gt;------.&amp;gt;+. Good -2147483648 AcWing 291. 蒙德里安的梦想 求把 $N×M$ 的棋盘分割成若干个……</summary><content type="html">&lt;h1 id="hello">Hello&lt;/h1>
+&lt;/ul></content><category scheme="https://berylyvos.icu/categories/%E7%8E%A9/" term="玩" label="玩"/><category scheme="https://berylyvos.icu/tags/golang/" term="Golang" label="Golang"/><category scheme="https://berylyvos.icu/tags/bittorrent/" term="BitTorrent" label="BitTorrent"/></entry><entry><title type="text">void kernel</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/hello-world/"/><id>https://berylyvos.icu/posts/hello-world/</id><updated>2022-11-23T02:45:15+00:00</updated><published>2022-11-11T01:38:56+08:00</published><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">Hello Okay, this is Crazy. void kernel 1 2 3 4 ++++++++++[&amp;gt;+++++++&amp;gt;+++++++++++&amp;gt;+++&amp;lt;&amp;lt;&amp;lt;-] &amp;gt;++++++++.&amp;gt;+.&amp;gt;++.&amp;lt;&amp;lt;-------.&amp;gt;------.+++++ ++++.------.&amp;gt;.&amp;lt;&amp;lt;-.&amp;gt;+++++++++.----------- -------.++++++++.&amp;gt;.&amp;lt;&amp;lt;+++++++.&amp;gt;------.&amp;gt;+. Good -2147483648 AcWing 291. 蒙德里安的梦想 求把 $N×M$ 的棋盘分割成若干个……</summary><content type="html">&lt;h1 id="hello">Hello&lt;/h1>
 &lt;hr>
 &lt;p>Okay,&lt;br>
 this is Crazy.&lt;/p>
