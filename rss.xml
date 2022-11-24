@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>void kernel</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (berylyvos)</managingEditor><webMaster>berylyvos@gmail.com (berylyvos)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Wed, 23 Nov 2022 12:09:40 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>void kernel</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (berylyvos)</managingEditor><webMaster>berylyvos@gmail.com (berylyvos)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Thu, 24 Nov 2022 10:38:17 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
 &lt;ul>
-&lt;li>torrent下载&lt;/li>
-&lt;li>&lt;del>支持多文件&lt;/del>&lt;/li>
-&lt;li>&lt;del>支持磁力链接&lt;/del>&lt;/li>
+&lt;li>多文件torrent下载&lt;/li>
+&lt;li>支持UDP/HTTP Tracker&lt;/li>
+&lt;li>&lt;del>支持DHT，PeX，磁力链接&lt;/del>&lt;/li>
 &lt;/ul>
 &lt;h1 id="golang实现">Golang实现&lt;/h1>
 &lt;h2 id="找peers">找peers&lt;/h2>
@@ -10,7 +10,7 @@
 &lt;p>一个torrent文件包含一个&lt;strong>文件列表&lt;/strong>和关于所有片段的&lt;strong>完整性元数据&lt;/strong>(integrity metadata)，并可选地包含一个很长的&lt;strong>tracker&lt;/strong>列表，并由&lt;strong>Bencode&lt;/strong>编码。&lt;/p>
 &lt;p>Bencode编码支持4种数据类型：byte string，integer，list和dictionary。&lt;/p>
 &lt;p>以电影&lt;a href="https://www.imdb.com/title/tt0088847/">《早餐俱乐部》&lt;/a>为例，其torrent文件结构如下所示：&lt;/p>
-&lt;pre tabindex="0">&lt;code>d
+&lt;pre tabindex="0">&lt;code class="language-cgo" data-lang="cgo">d
 8:announce
 43:udp://tracker.coppersurfer.tk:6969/announce
 13:announce-list
@@ -69,10 +69,56 @@ e
 &lt;/ul>
 &lt;p>一个torrent文件是由&lt;strong>infohash&lt;/strong>唯一标识的，其值为整个&lt;code>info&lt;/code>的SHA-1哈希。&lt;/p>
 &lt;h3 id="解析torrent文件">解析torrent文件&lt;/h3>
-&lt;p>解析bencode编码的torrent文件，本质是递归下降。当然，Marshal/Unmarshal的过程需要借助go的反射。&lt;/p>
-&lt;h3 id="从tracker获取peers信息">从tracker获取peers信息&lt;/h3>
+&lt;p>解析bencode编码的torrent文件，本质是递归下降。当然，Marshal/Unmarshal的过程需要借助go的反射。最终解析得到一个扁平化的结构体&lt;code>TorrentFile&lt;/code>。&lt;/p>
+&lt;pre tabindex="0">&lt;code class="language-cgo" data-lang="cgo">type TorrentFile struct {
+Announce string
+AnnounceList []string
+InfoSHA [ShaLen]byte
+FileList []File
+FileName string
+FileLen int
+PieceLen int
+PieceSHA [][ShaLen]byte
+HasMulti bool
+}
+&lt;/code>&lt;/pre>&lt;h3 id="从tracker获取peers信息">从tracker获取peers信息&lt;/h3>
+&lt;p>根据&lt;code>Announce&lt;/code>中URL的协议类型，可将tracker分为UDP/HTTP tracker。&lt;/p>
 &lt;h4 id="http">HTTP&lt;/h4>
+&lt;p>想要得到peers信息，需要给tracker发送一个GET请求。参数列表如下：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>info_hash&lt;/code>：torrent文件中&lt;code>info&lt;/code>字典（bencode编码）的SHA-1哈希&lt;/li>
+&lt;li>&lt;code>peer_id&lt;/code>：客户端随机生成的20字节长度字符串&lt;/li>
+&lt;li>&lt;code>port&lt;/code>：客户端监听的端口&lt;/li>
+&lt;li>&lt;code>uploaded&lt;/code>：当前已上传量&lt;/li>
+&lt;li>&lt;code>downloaded&lt;/code>：当前已下载量&lt;/li>
+&lt;li>&lt;code>left&lt;/code>：当前剩余下载量&lt;/li>
+&lt;/ul>
+&lt;p>tracker收到请求后返回一个bencode编码的字典。&lt;/p>
+&lt;pre tabindex="0">&lt;code class="language-cgo" data-lang="cgo">d
+8:interval
+i900e
+5:peers
+252:([ip][port]...)
+e
+&lt;/code>&lt;/pre>&lt;p>其中，&lt;code>interval&lt;/code>表示请求tracker的时间间隔，&lt;code>peers&lt;/code>包含了peer的IP地址和端口信息（大端表示），其值为每6字节一组的二进制数据。同样，需要解析得到peer信息切片。&lt;/p>
 &lt;h4 id="udp">UDP&lt;/h4>
+&lt;p>为了减少HTTP请求给tracker服务器带来的开销、提升性能，tracker也支持UDP。&lt;/p>
+&lt;p>与HTTP的一次请求响应不同，由于UDP不可靠，客户端至少需要发送两个UDP数据包。为了保证安全性，tracker在收到客户端的第一个包时返回一个&lt;code>connection_id&lt;/code>，让客户端在下一个包带上该参数，tracker收到后校验。同时，&lt;code>connection_id&lt;/code>一段时间后会失效。&lt;/p>
+&lt;h5 id="connect">Connect&lt;/h5>
+&lt;p>首先，客户端发送connect包，参数如下：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>connection_id&lt;/code>：初始值为0x41727101980，用于标识协议&lt;/li>
+&lt;li>&lt;code>action&lt;/code>：0 表示connect请求&lt;/li>
+&lt;li>&lt;code>transaction_id&lt;/code>：随机值，4字节&lt;/li>
+&lt;/ul>
+&lt;p>tracker服务器返回的包：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>action&lt;/code>：0 表示connect请求（如果出错则为3）&lt;/li>
+&lt;li>&lt;code>transaction_id&lt;/code>：与客户端发送的保持一致&lt;/li>
+&lt;li>&lt;code>connection_id&lt;/code>：由tracker生成，用于标识客户端&lt;/li>
+&lt;/ul>
+&lt;h5 id="announce">Announce&lt;/h5>
+&lt;p>随后，客户端发送announce包，参数如下：&lt;/p>
 &lt;h2 id="下载">下载&lt;/h2>
 &lt;h3 id="tcp连接与bittorrent握手">TCP连接与BitTorrent握手&lt;/h3>
 &lt;h3 id="与peers交换信息">与peers交换信息&lt;/h3>
@@ -83,6 +129,8 @@ e
 &lt;li>&lt;a href="https://wiki.theory.org/BitTorrentSpecification">Bittorrent Protocol Specification v1.0&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://github.com/archeryue/go-torrent">A toy torrent client written in golang&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://blog.jse.li/posts/torrent">Building a BitTorrent client from the ground up in Go&lt;/a>&lt;/li>
+&lt;li>&lt;a href="http://bittorrent.org/beps/bep_0015.html">BEP-15: UDP Tracker Protocol for BitTorrent&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://lifehacker.com/bittorrent-s-future-dht-pex-and-magnet-links-explain-5411311">BitTorrent’s Future: DHT, PEX, and Magnet Links Explained&lt;/a>&lt;/li>
 &lt;/ul></description><category domain="https://berylyvos.icu/categories/%E7%8E%A9/">玩</category><category domain="https://berylyvos.icu/tags/golang/">Golang</category><category domain="https://berylyvos.icu/tags/bittorrent/">BitTorrent</category></item><item><title>void kernel</title><link>https://berylyvos.icu/posts/hello-world/</link><guid isPermaLink="true">https://berylyvos.icu/posts/hello-world/</guid><pubDate>Fri, 11 Nov 2022 01:38:56 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="hello">Hello&lt;/h1>
 &lt;hr>
 &lt;p>Okay,&lt;br>
