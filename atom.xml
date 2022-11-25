@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN"><title type="text">void kernel</title><subtitle type="html">This is Shigo Gnix's no interest blog.</subtitle><updated>2022-11-25T02:04:50+00:00</updated><id>https://berylyvos.icu/</id><link rel="alternate" type="text/html" href="https://berylyvos.icu/"/><link rel="self" type="application/atom+xml" href="https://berylyvos.icu/atom.xml"/><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><generator uri="https://gohugo.io/" version="0.104.3">Hugo</generator><entry><title type="text">简单做个BitTorrent客户端</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/gorrent/"/><id>https://berylyvos.icu/posts/gorrent/</id><updated>2022-11-25T02:04:47+00:00</updated><published>2022-11-17T11:15:54+08:00</published><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">功能 多文件torrent下载 支持UDP/HTTP Tracker 支持DHT，PeX，磁力链接 Gol……</summary><content type="html">&lt;h1 id="功能">功能&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN"><title type="text">Shingo四叠半</title><subtitle type="html">This is Shigo Gnix's no interest blog.</subtitle><updated>2022-11-25T02:29:04+00:00</updated><id>https://berylyvos.icu/</id><link rel="alternate" type="text/html" href="https://berylyvos.icu/"/><link rel="self" type="application/atom+xml" href="https://berylyvos.icu/atom.xml"/><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><generator uri="https://gohugo.io/" version="0.104.3">Hugo</generator><entry><title type="text">简单做个BitTorrent客户端</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/gorrent/"/><id>https://berylyvos.icu/posts/gorrent/</id><updated>2022-11-25T02:29:00+00:00</updated><published>2022-11-17T11:15:54+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">功能 多文件torrent下载 支持UDP/HTTP Tracker 支持DHT，PeX，磁力链接 Gol……</summary><content type="html">&lt;h1 id="功能">功能&lt;/h1>
 &lt;ul>
 &lt;li>多文件torrent下载&lt;/li>
 &lt;li>支持UDP/HTTP Tracker&lt;/li>
@@ -177,7 +177,7 @@
 &lt;/div>&lt;p>其中，&lt;code>interval&lt;/code>表示请求tracker的时间间隔，&lt;code>peers&lt;/code>包含了peer的IP地址和端口信息（大端表示），其值为每6字节一组的二进制数据。同样，需要解析得到peer信息切片。&lt;/p>
 &lt;h4 id="udp">UDP&lt;/h4>
 &lt;p>为了减少HTTP请求给tracker服务器带来的开销、提升性能，tracker也支持UDP。&lt;/p>
-&lt;p>与HTTP的一次请求响应不同，由于UDP不可靠，客户端至少需要发送两个UDP数据包。为了保证安全性，tracker在收到客户端的第一个包时返回一个&lt;code>connection_id&lt;/code>，让客户端在下一个包带上该参数，tracker收到后校验。同时，&lt;code>connection_id&lt;/code>一段时间后会失效。&lt;/p>
+&lt;p>与HTTP的一次请求响应不同，由于UDP不可靠，客户端至少需要发送两个UDP数据包。为了保证安全性，tracker在收到客户端的第一个包时返回一个&lt;code>connection_id&lt;/code>，让客户端在下一个包带上该参数，收到后校验。同时，&lt;code>connection_id&lt;/code>一段时间后会失效。&lt;/p>
 &lt;h5 id="connect">Connect&lt;/h5>
 &lt;p>首先，客户端发送connect包，参数如下：&lt;/p>
 &lt;ul>
@@ -197,7 +197,7 @@
 &lt;li>&lt;code>connection_id&lt;/code>：tracker返回的connection_id&lt;/li>
 &lt;li>&lt;code>action&lt;/code>：1 表示announce请求&lt;/li>
 &lt;li>&lt;code>transaction_id&lt;/code>：随机值，4Bytes&lt;/li>
-&lt;li>&lt;code>event&lt;/code>：none = 0 completed = 1 started = 2 stopped = 3&lt;/li>
+&lt;li>&lt;code>event&lt;/code>：none = 0, completed = 1, started = 2, stopped = 3&lt;/li>
 &lt;li>&lt;code>key&lt;/code>：随机值，4Bytes&lt;/li>
 &lt;li>&lt;code>num_want&lt;/code>：想要tracker返回的最大peers数量，-1为默认值&lt;/li>
 &lt;/ul>
@@ -208,7 +208,7 @@
 &lt;li>&lt;code>transaction_id&lt;/code>：与客户端请求值一致&lt;/li>
 &lt;li>&lt;code>interval&lt;/code>：下一次客户端announce的时间间隔&lt;/li>
 &lt;li>&lt;code>leechers&lt;/code>：未完成下载的peers数量&lt;/li>
-&lt;li>&lt;code>seeders&lt;/code>：已经完成下载且愿意上传的peers数量&lt;/li>
+&lt;li>&lt;code>seeders&lt;/code>：已经完成下载且愿意继续上传的peers数量&lt;/li>
 &lt;/ul>
 &lt;p>包的最后是6字节一组的peers信息。&lt;/p>
 &lt;p>出错时tracker的返回：&lt;/p>
@@ -229,7 +229,7 @@
 &lt;li>&lt;a href="https://blog.jse.li/posts/torrent">Building a BitTorrent client from the ground up in Go&lt;/a>&lt;/li>
 &lt;li>&lt;a href="http://bittorrent.org/beps/bep_0015.html">BEP-15: UDP Tracker Protocol for BitTorrent&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://lifehacker.com/bittorrent-s-future-dht-pex-and-magnet-links-explain-5411311">BitTorrent’s Future: DHT, PEX, and Magnet Links Explained&lt;/a>&lt;/li>
-&lt;/ul></content><category scheme="https://berylyvos.icu/categories/%E7%8E%A9/" term="玩" label="玩"/><category scheme="https://berylyvos.icu/tags/golang/" term="Golang" label="Golang"/><category scheme="https://berylyvos.icu/tags/bittorrent/" term="BitTorrent" label="BitTorrent"/></entry><entry><title type="text">void kernel</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/hello-world/"/><id>https://berylyvos.icu/posts/hello-world/</id><updated>2022-11-25T02:04:47+00:00</updated><published>2022-11-11T01:38:56+08:00</published><author><name>berylyvos</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">Hello Okay, this is Crazy. void kernel 1 2 3 4 ++++++++++[&amp;gt;+++++++&amp;gt;+++++++++++&amp;gt;+++&amp;lt;&amp;lt;&amp;lt;-] &amp;gt;++++++++.&amp;gt;+.&amp;gt;++.&amp;lt;&amp;lt;-------.&amp;gt;------.+++++ ++++.------.&amp;gt;.&amp;lt;&amp;lt;-.&amp;gt;+++++++++.----------- -------.++++++++.&amp;gt;.&amp;lt;&amp;lt;+++++++.&amp;gt;------.&amp;gt;+. Good -2147483648 AcWing 291. 蒙德里安的梦想 求把 $N×M$ 的棋盘分割成若干个……</summary><content type="html">&lt;h1 id="hello">Hello&lt;/h1>
+&lt;/ul></content><category scheme="https://berylyvos.icu/categories/%E7%8E%A9/" term="玩" label="玩"/><category scheme="https://berylyvos.icu/tags/golang/" term="Golang" label="Golang"/><category scheme="https://berylyvos.icu/tags/bittorrent/" term="BitTorrent" label="BitTorrent"/></entry><entry><title type="text">void kernel</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/hello-world/"/><id>https://berylyvos.icu/posts/hello-world/</id><updated>2022-11-25T02:29:00+00:00</updated><published>2022-11-11T01:38:56+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">Hello Okay, this is Crazy. void kernel 1 2 3 4 ++++++++++[&amp;gt;+++++++&amp;gt;+++++++++++&amp;gt;+++&amp;lt;&amp;lt;&amp;lt;-] &amp;gt;++++++++.&amp;gt;+.&amp;gt;++.&amp;lt;&amp;lt;-------.&amp;gt;------.+++++ ++++.------.&amp;gt;.&amp;lt;&amp;lt;-.&amp;gt;+++++++++.----------- -------.++++++++.&amp;gt;.&amp;lt;&amp;lt;+++++++.&amp;gt;------.&amp;gt;+. Good -2147483648 AcWing 291. 蒙德里安的梦想 求把 $N×M$ 的棋盘分割成若干个……</summary><content type="html">&lt;h1 id="hello">Hello&lt;/h1>
 &lt;hr>
 &lt;p>Okay,&lt;br>
 this is Crazy.&lt;/p>
