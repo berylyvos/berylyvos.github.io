@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>void kernel</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (berylyvos)</managingEditor><webMaster>berylyvos@gmail.com (berylyvos)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Thu, 24 Nov 2022 10:38:17 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>void kernel</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (berylyvos)</managingEditor><webMaster>berylyvos@gmail.com (berylyvos)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Fri, 25 Nov 2022 02:04:51 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (berylyvos)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
 &lt;ul>
 &lt;li>多文件torrent下载&lt;/li>
 &lt;li>支持UDP/HTTP Tracker&lt;/li>
@@ -10,46 +10,91 @@
 &lt;p>一个torrent文件包含一个&lt;strong>文件列表&lt;/strong>和关于所有片段的&lt;strong>完整性元数据&lt;/strong>(integrity metadata)，并可选地包含一个很长的&lt;strong>tracker&lt;/strong>列表，并由&lt;strong>Bencode&lt;/strong>编码。&lt;/p>
 &lt;p>Bencode编码支持4种数据类型：byte string，integer，list和dictionary。&lt;/p>
 &lt;p>以电影&lt;a href="https://www.imdb.com/title/tt0088847/">《早餐俱乐部》&lt;/a>为例，其torrent文件结构如下所示：&lt;/p>
-&lt;pre tabindex="0">&lt;code class="language-cgo" data-lang="cgo">d
-8:announce
-43:udp://tracker.coppersurfer.tk:6969/announce
-13:announce-list
-l
-l43:udp://tracker.coppersurfer.tk:6969/announcee
-l49:udp://tracker.leechers-paradise.org:6969/announcee
-l38:udp://tracker.cyberia.is:6969/announcee
-...
-e
-7:comment
-80:The.Breakfast.Club.1985.REMASTERED.720p.BluRay.999MB.HQ.x265.10bit-GalaxyRG[TGx]
-13:creation date
-i1600189812e
-4:info
-d
-5:files
-l
-d
-6:length
-i1035352868e
-4:path
-l79:The.Breakfast.Club.1985.REMASTERED.720p.BluRay.999MB.HQ.x265.10bit-GalaxyRG.mkve
-e
-d
-6:length
-i678e
-4:path
-l42:[TGx]Downloaded from torrentgalaxy.to .txte
-e
-e
-4:name
-80:The.Breakfast.Club.1985.REMASTERED.720p.BluRay.999MB.HQ.x265.10bit-GalaxyRG[TGx]
-12:piece length
-i524288e
-6:pieces
-39500:x���vģ�B�Ɇp�6��HH&amp;#34;c�`f|��� ...
-e
-e
-&lt;/code>&lt;/pre>&lt;p>在这个字典中，所有键和字符串类型值的结构都是&lt;code>length:xxx&lt;/code>，整型表示为&lt;code>ixxxe&lt;/code>，列表为&lt;code>l[]...[]e&lt;/code>，字典为&lt;code>d(key:[])...(key:[])e&lt;/code>，其中，&lt;code>[]&lt;/code>可以为四种类型的任意一种。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;span class="lnt">30
+&lt;/span>&lt;span class="lnt">31
+&lt;/span>&lt;span class="lnt">32
+&lt;/span>&lt;span class="lnt">33
+&lt;/span>&lt;span class="lnt">34
+&lt;/span>&lt;span class="lnt">35
+&lt;/span>&lt;span class="lnt">36
+&lt;/span>&lt;span class="lnt">37
+&lt;/span>&lt;span class="lnt">38
+&lt;/span>&lt;span class="lnt">39
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="nx">d&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">8&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">announce&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">43&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">udp&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="c1">//tracker.coppersurfer.tk:6969/announce
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="mi">13&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">announce&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="nx">list&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">l&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">l43&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">udp&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="c1">//tracker.coppersurfer.tk:6969/announcee
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">l49&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">udp&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="c1">//tracker.leechers-paradise.org:6969/announcee
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="nx">l38&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">udp&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="c1">//tracker.cyberia.is:6969/announcee
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="o">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">e&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">7&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">comment&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">80&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">The&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Breakfast&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Club&lt;/span>&lt;span class="mf">.1985&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">REMASTERED&lt;/span>&lt;span class="mf">.720&lt;/span>&lt;span class="nx">p&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">BluRay&lt;/span>&lt;span class="mf">.999&lt;/span>&lt;span class="nx">MB&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">HQ&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">x265&lt;/span>&lt;span class="mf">.10&lt;/span>&lt;span class="nx">bit&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="nx">GalaxyRG&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">TGx&lt;/span>&lt;span class="p">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">13&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">creation&lt;/span> &lt;span class="nx">date&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">i1600189812e&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">4&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">info&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">d&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">5&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">files&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">l&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">d&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">6&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">length&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">i1035352868e&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">4&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">path&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">l79&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">The&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Breakfast&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Club&lt;/span>&lt;span class="mf">.1985&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">REMASTERED&lt;/span>&lt;span class="mf">.720&lt;/span>&lt;span class="nx">p&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">BluRay&lt;/span>&lt;span class="mf">.999&lt;/span>&lt;span class="nx">MB&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">HQ&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">x265&lt;/span>&lt;span class="mf">.10&lt;/span>&lt;span class="nx">bit&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="nx">GalaxyRG&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">mkve&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">e&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">d&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">6&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">length&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">i678e&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">4&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">path&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">l42&lt;/span>&lt;span class="p">:[&lt;/span>&lt;span class="nx">TGx&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="nx">Downloaded&lt;/span> &lt;span class="nx">from&lt;/span> &lt;span class="nx">torrentgalaxy&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">to&lt;/span> &lt;span class="p">.&lt;/span>&lt;span class="nx">txte&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">e&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">e&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">4&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">name&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">80&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">The&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Breakfast&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Club&lt;/span>&lt;span class="mf">.1985&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">REMASTERED&lt;/span>&lt;span class="mf">.720&lt;/span>&lt;span class="nx">p&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">BluRay&lt;/span>&lt;span class="mf">.999&lt;/span>&lt;span class="nx">MB&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">HQ&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">x265&lt;/span>&lt;span class="mf">.10&lt;/span>&lt;span class="nx">bit&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="nx">GalaxyRG&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">TGx&lt;/span>&lt;span class="p">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">12&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">piece&lt;/span> &lt;span class="nx">length&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">i524288e&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">6&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">pieces&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">39500&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">x&lt;/span>&lt;span class="err">���&lt;/span>&lt;span class="nx">v&lt;/span>&lt;span class="err">&lt;/span>&lt;span class="nx">ģ&lt;/span>&lt;span class="err">�&lt;/span>&lt;span class="nx">B&lt;/span>&lt;span class="err">�&lt;/span>&lt;span class="nx">Ɇp&lt;/span>&lt;span class="err">�&lt;/span>&lt;span class="mi">6&lt;/span>&lt;span class="err">��&lt;/span>&lt;span class="nx">HH&lt;/span>&lt;span class="err">&amp;#34;&lt;/span>&lt;span class="nx">c&lt;/span>&lt;span class="err">�`&lt;/span>&lt;span class="nx">f&lt;/span>&lt;span class="p">|&lt;/span>&lt;span class="err">���&lt;/span> &lt;span class="o">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">e&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">e&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>在这个字典中，所有键和字符串类型值的结构都是&lt;code>length:xxx&lt;/code>，整型表示为&lt;code>ixxxe&lt;/code>，列表为&lt;code>l[]...[]e&lt;/code>，字典为&lt;code>d(key:[])...(key:[])e&lt;/code>，其中，&lt;code>[]&lt;/code>可以为四种类型的任意一种。&lt;/p>
 &lt;ul>
 &lt;li>&lt;code>announce&lt;/code>：tracker的URL&lt;/li>
 &lt;li>&lt;code>announce-list&lt;/code>：tracker的URL列表（可选）&lt;/li>
@@ -70,18 +115,35 @@ e
 &lt;p>一个torrent文件是由&lt;strong>infohash&lt;/strong>唯一标识的，其值为整个&lt;code>info&lt;/code>的SHA-1哈希。&lt;/p>
 &lt;h3 id="解析torrent文件">解析torrent文件&lt;/h3>
 &lt;p>解析bencode编码的torrent文件，本质是递归下降。当然，Marshal/Unmarshal的过程需要借助go的反射。最终解析得到一个扁平化的结构体&lt;code>TorrentFile&lt;/code>。&lt;/p>
-&lt;pre tabindex="0">&lt;code class="language-cgo" data-lang="cgo">type TorrentFile struct {
-Announce string
-AnnounceList []string
-InfoSHA [ShaLen]byte
-FileList []File
-FileName string
-FileLen int
-PieceLen int
-PieceSHA [][ShaLen]byte
-HasMulti bool
-}
-&lt;/code>&lt;/pre>&lt;h3 id="从tracker获取peers信息">从tracker获取peers信息&lt;/h3>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="kd">type&lt;/span> &lt;span class="nx">TorrentFile&lt;/span> &lt;span class="kd">struct&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Announce&lt;/span> &lt;span class="kt">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">AnnounceList&lt;/span> &lt;span class="p">[]&lt;/span>&lt;span class="kt">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">InfoSHA&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="nx">ShaLen&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="kt">byte&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">FileList&lt;/span> &lt;span class="p">[]&lt;/span>&lt;span class="nx">File&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">FileName&lt;/span> &lt;span class="kt">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">FileLen&lt;/span> &lt;span class="kt">int&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">PieceLen&lt;/span> &lt;span class="kt">int&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">PieceSHA&lt;/span> &lt;span class="p">[][&lt;/span>&lt;span class="nx">ShaLen&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="kt">byte&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">HasMulti&lt;/span> &lt;span class="kt">bool&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="从tracker获取peers信息">从tracker获取peers信息&lt;/h3>
 &lt;p>根据&lt;code>Announce&lt;/code>中URL的协议类型，可将tracker分为UDP/HTTP tracker。&lt;/p>
 &lt;h4 id="http">HTTP&lt;/h4>
 &lt;p>想要得到peers信息，需要给tracker发送一个GET请求。参数列表如下：&lt;/p>
@@ -94,13 +156,25 @@ HasMulti bool
 &lt;li>&lt;code>left&lt;/code>：当前剩余下载量&lt;/li>
 &lt;/ul>
 &lt;p>tracker收到请求后返回一个bencode编码的字典。&lt;/p>
-&lt;pre tabindex="0">&lt;code class="language-cgo" data-lang="cgo">d
-8:interval
-i900e
-5:peers
-252:([ip][port]...)
-e
-&lt;/code>&lt;/pre>&lt;p>其中，&lt;code>interval&lt;/code>表示请求tracker的时间间隔，&lt;code>peers&lt;/code>包含了peer的IP地址和端口信息（大端表示），其值为每6字节一组的二进制数据。同样，需要解析得到peer信息切片。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="nx">d&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">8&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">interval&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">i900e&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">5&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="nx">peers&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="mi">252&lt;/span>&lt;span class="p">:([&lt;/span>&lt;span class="nx">ip&lt;/span>&lt;span class="p">][&lt;/span>&lt;span class="nx">port&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="o">...&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">e&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>其中，&lt;code>interval&lt;/code>表示请求tracker的时间间隔，&lt;code>peers&lt;/code>包含了peer的IP地址和端口信息（大端表示），其值为每6字节一组的二进制数据。同样，需要解析得到peer信息切片。&lt;/p>
 &lt;h4 id="udp">UDP&lt;/h4>
 &lt;p>为了减少HTTP请求给tracker服务器带来的开销、提升性能，tracker也支持UDP。&lt;/p>
 &lt;p>与HTTP的一次请求响应不同，由于UDP不可靠，客户端至少需要发送两个UDP数据包。为了保证安全性，tracker在收到客户端的第一个包时返回一个&lt;code>connection_id&lt;/code>，让客户端在下一个包带上该参数，tracker收到后校验。同时，&lt;code>connection_id&lt;/code>一段时间后会失效。&lt;/p>
@@ -109,16 +183,40 @@ e
 &lt;ul>
 &lt;li>&lt;code>connection_id&lt;/code>：初始值为0x41727101980，用于标识协议&lt;/li>
 &lt;li>&lt;code>action&lt;/code>：0 表示connect请求&lt;/li>
-&lt;li>&lt;code>transaction_id&lt;/code>：随机值，4字节&lt;/li>
+&lt;li>&lt;code>transaction_id&lt;/code>：随机值，4Bytes&lt;/li>
 &lt;/ul>
 &lt;p>tracker服务器返回的包：&lt;/p>
 &lt;ul>
 &lt;li>&lt;code>action&lt;/code>：0 表示connect请求（如果出错则为3）&lt;/li>
-&lt;li>&lt;code>transaction_id&lt;/code>：与客户端发送的保持一致&lt;/li>
+&lt;li>&lt;code>transaction_id&lt;/code>：与客户端请求值一致&lt;/li>
 &lt;li>&lt;code>connection_id&lt;/code>：由tracker生成，用于标识客户端&lt;/li>
 &lt;/ul>
 &lt;h5 id="announce">Announce&lt;/h5>
 &lt;p>随后，客户端发送announce包，参数如下：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>connection_id&lt;/code>：tracker返回的connection_id&lt;/li>
+&lt;li>&lt;code>action&lt;/code>：1 表示announce请求&lt;/li>
+&lt;li>&lt;code>transaction_id&lt;/code>：随机值，4Bytes&lt;/li>
+&lt;li>&lt;code>event&lt;/code>：none = 0 completed = 1 started = 2 stopped = 3&lt;/li>
+&lt;li>&lt;code>key&lt;/code>：随机值，4Bytes&lt;/li>
+&lt;li>&lt;code>num_want&lt;/code>：想要tracker返回的最大peers数量，-1为默认值&lt;/li>
+&lt;/ul>
+&lt;p>剩余的&lt;code>info_hash&lt;/code>，&lt;code>peer_id&lt;/code>这些参数与HTTP请求tracker时相同。
+最后，tracker服务器返回包含peers信息的包：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>action&lt;/code>：1 表示announce请求&lt;/li>
+&lt;li>&lt;code>transaction_id&lt;/code>：与客户端请求值一致&lt;/li>
+&lt;li>&lt;code>interval&lt;/code>：下一次客户端announce的时间间隔&lt;/li>
+&lt;li>&lt;code>leechers&lt;/code>：未完成下载的peers数量&lt;/li>
+&lt;li>&lt;code>seeders&lt;/code>：已经完成下载且愿意上传的peers数量&lt;/li>
+&lt;/ul>
+&lt;p>包的最后是6字节一组的peers信息。&lt;/p>
+&lt;p>出错时tracker的返回：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>action&lt;/code>：3 表示errors&lt;/li>
+&lt;li>&lt;code>transaction_id&lt;/code>：与客户端请求值一致&lt;/li>
+&lt;li>&lt;code>error_string&lt;/code>：描述错误的字符串&lt;/li>
+&lt;/ul>
 &lt;h2 id="下载">下载&lt;/h2>
 &lt;h3 id="tcp连接与bittorrent握手">TCP连接与BitTorrent握手&lt;/h3>
 &lt;h3 id="与peers交换信息">与peers交换信息&lt;/h3>
