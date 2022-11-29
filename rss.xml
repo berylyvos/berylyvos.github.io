@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Fri, 25 Nov 2022 02:29:04 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Tue, 29 Nov 2022 11:50:20 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
 &lt;ul>
 &lt;li>多文件torrent下载&lt;/li>
 &lt;li>支持UDP/HTTP Tracker&lt;/li>
@@ -181,7 +181,7 @@
 &lt;h5 id="connect">Connect&lt;/h5>
 &lt;p>首先，客户端发送connect包，参数如下：&lt;/p>
 &lt;ul>
-&lt;li>&lt;code>connection_id&lt;/code>：初始值为0x41727101980，用于标识协议&lt;/li>
+&lt;li>&lt;code>protocol_id&lt;/code>：0x41727101980，用于标识协议&lt;/li>
 &lt;li>&lt;code>action&lt;/code>：0 表示connect请求&lt;/li>
 &lt;li>&lt;code>transaction_id&lt;/code>：随机值，4Bytes&lt;/li>
 &lt;/ul>
