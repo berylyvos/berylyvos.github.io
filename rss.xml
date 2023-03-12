@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Thu, 01 Dec 2022 10:32:25 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Sun, 12 Mar 2023 14:36:37 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
 &lt;ul>
 &lt;li>多文件torrent下载&lt;/li>
 &lt;li>支持UDP/HTTP Tracker&lt;/li>
@@ -210,13 +210,7 @@
 &lt;li>&lt;code>leechers&lt;/code>：未完成下载的peers数量&lt;/li>
 &lt;li>&lt;code>seeders&lt;/code>：已经完成下载且愿意继续上传的peers数量&lt;/li>
 &lt;/ul>
-&lt;p>包的最后是6字节一组的peers信息。&lt;/p>
-&lt;p>出错时tracker的返回：&lt;/p>
-&lt;ul>
-&lt;li>&lt;code>action&lt;/code>：3 表示errors&lt;/li>
-&lt;li>&lt;code>transaction_id&lt;/code>：与客户端请求值一致&lt;/li>
-&lt;li>&lt;code>error_string&lt;/code>：描述错误的字符串&lt;/li>
-&lt;/ul>
+&lt;p>包的最后是6字节一组的peers信息（IP + Port）。&lt;/p>
 &lt;h2 id="下载">下载&lt;/h2>
 &lt;h3 id="tcp连接与bittorrent握手">TCP连接与BitTorrent握手&lt;/h3>
 &lt;h3 id="与peers交换信息">与peers交换信息&lt;/h3>
