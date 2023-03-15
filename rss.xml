@@ -1,4 +1,24 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Wed, 15 Mar 2023 14:32:46 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>CMU15-445(Fall 2022) 笔记：Pilot</title><link>https://berylyvos.icu/posts/15-445-note-1/</link><guid isPermaLink="true">https://berylyvos.icu/posts/15-445-note-1/</guid><pubDate>Sun, 05 Mar 2023 22:53:43 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="关系模型-与-关系代数">关系模型 与 关系代数&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Wed, 15 Mar 2023 15:52:13 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>CMU15-445(Fall 2022) 笔记：Pilot</title><link>https://berylyvos.icu/posts/15-445-note-1/</link><guid isPermaLink="true">https://berylyvos.icu/posts/15-445-note-1/</guid><pubDate>Sun, 05 Mar 2023 22:53:43 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="关系模型-与-关系代数">关系模型 与 关系代数&lt;/h1>
+&lt;blockquote>
+&lt;p>A database is an organized collection of inter-related data that models some aspect of the real-world.&lt;/p>
+&lt;/blockquote>
+&lt;p>不要混淆“数据库(database)”和“数据库管理系统(database management system, DBMS)”。&lt;/p>
+&lt;blockquote>
+&lt;p>A DBMS is a software that allows applications to store and analyze information in a database.&lt;/p>
+&lt;/blockquote>
+&lt;p>MySQL, Oracle, MongoDB, Snowflake这些都是DBMS。&lt;/p>
+&lt;p>&lt;strong>关系模型&lt;/strong>基于关系定义数据库抽象，解耦合逻辑层与物理层。&lt;/p>
+&lt;ul>
+&lt;li>将数据库存储在简单的数据结构(关系)中。&lt;/li>
+&lt;li>通过高级语言访问数据，DBMS找出最佳执行策略。&lt;/li>
+&lt;li>物理存储留给DBMS实现。&lt;/li>
+&lt;/ul>
+&lt;p>从数据库中存储和检索信息通常有两种语言：&lt;/p>
+&lt;ul>
+&lt;li>Procedural：查询命令需要指定 DBMS 执行时的具体查询策略（关系代数）&lt;/li>
+&lt;li>Non-Procedural（Declarative）：只需要指定想要查询哪些数据，无需关心具体查询实现（关系演算）&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>关系代数&lt;/strong>是一种Procedural语言，因为它定义了如何计算查询的high-level步骤（比如先做join还是projection，这对于查询优化很重要）&lt;/p>
 &lt;h1 id="现代sql">现代SQL&lt;/h1>
 &lt;h1 id="存储">存储&lt;/h1>
 &lt;h1 id="buffer-pool">Buffer Pool&lt;/h1>
