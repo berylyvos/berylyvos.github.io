@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Thu, 16 Mar 2023 13:17:18 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>CMU15-445(Fall 2022) 笔记：Pilot</title><link>https://berylyvos.icu/posts/15-445-note-1/</link><guid isPermaLink="true">https://berylyvos.icu/posts/15-445-note-1/</guid><pubDate>Sun, 05 Mar 2023 22:53:43 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="关系模型与关系代数">关系模型与关系代数&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Fri, 17 Mar 2023 11:19:13 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>CMU15-445(Fall 2022) 笔记：Pilot</title><link>https://berylyvos.icu/posts/15-445-note-1/</link><guid isPermaLink="true">https://berylyvos.icu/posts/15-445-note-1/</guid><pubDate>Sun, 05 Mar 2023 22:53:43 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="关系模型与关系代数">关系模型与关系代数&lt;/h1>
 &lt;blockquote>
 &lt;p>A database is an organized collection of inter-related data that models some aspect of the real-world.&lt;/p>
 &lt;/blockquote>
@@ -86,29 +86,28 @@
 &lt;/div>
 &lt;/div>&lt;h1 id="存储">存储&lt;/h1>
 &lt;h2 id="面向磁盘的dbms">面向磁盘的DBMS&lt;/h2>
-&lt;p>&lt;img src="https://s2.loli.net/2023/03/16/BliFYkMCmsPTSAN.png" alt="disk-oriented-dbms.png">&lt;/p>
+&lt;p>&lt;img src="https://s2.loli.net/2023/03/17/7DgvBXJ4C5T1QsV.png" alt="disk-oriented-dbms">&lt;/p>
 &lt;p>数据库全部在磁盘上，数据库文件中的数据被组织成页，第一页是目录页。
 为了对数据进行操作，DBMS需要将数据放入内存中。它通过缓冲池（Buffer Pool）来管理数据在磁盘和内存之间的来回移动。
-DBMS还有一个执行引擎来执行查询。执行引擎将向缓冲池请求特定的页面，缓冲池将负责将该页放入内存，并向执行引擎提供内存中该页的指针。&lt;/p>
+执行引擎将向缓冲池请求特定的页面，缓冲池将负责将该页放入内存，并向执行引擎提供内存中该页的指针。&lt;/p>
 &lt;h3 id="为什么不用mmap">为什么不用mmap&lt;/h3>
-&lt;p>OS 为开发者提供了如 mmap 这样的系统调用，使开发者能够依赖 OS 自动管理数据在内外存之间的移动，那么 DBMS 为什么要重复造这样的轮子？
-主要原因在于，OS 的磁盘管理模块并没有、也不可能会有 DBMS 中的领域知识，因此 DBMS 比 OS 拥有更多、更充分的知识来决定数据移动的时机和数量，具体包括：&lt;/p>
+&lt;p>简单来说，不用 mmap 是为了&lt;strong>更好的控制和性能&lt;/strong>。
+如果 mmap 遇到 page fault，进程将会被阻塞。mmap 不好做异常处理，也存在事务安全问题。
+DBMS 比 OS 拥有更多、更充分的知识来决定数据移动的时机和数量，具体包括：&lt;/p>
 &lt;ul>
 &lt;li>将 dirty pages 按正确地顺序写到磁盘&lt;/li>
 &lt;li>根据具体情况预获取数据&lt;/li>
-&lt;li>定制化缓存置换（buffer replacement）策略&lt;/li>
+&lt;li>定制化缓存置换策略&lt;/li>
 &lt;li>线程/进程调度&lt;/li>
 &lt;/ul>
+&lt;blockquote>
+&lt;p>更详细的讨论可以看这篇论文 &lt;a href="https://db.cs.cmu.edu/papers/2022/cidr2022-p13-crotty.pdf">Are You Sure You Want to Use MMAP in Your Database Management System?&lt;/a>&lt;/p>
+&lt;/blockquote>
 &lt;h2 id="文件存储">文件存储&lt;/h2>
 &lt;p>DBMS的存储管理器负责管理数据库的文件。它将文件表示为page的集合。它还跟踪哪些数据被读和写到了page上，以及这些page有多少可用空间。&lt;/p>
 &lt;h3 id="database-pages">Database Pages&lt;/h3>
-&lt;p>OS 的文件系统通常将文件切分成 pages 进行管理，DBMS 也不例外。通常 page 是固定大小的一块数据，每个 page 内部可能存储着 &lt;strong>tuples、meta-data、indexes&lt;/strong> 以及 &lt;strong>logs&lt;/strong> 等等，大多数 DBMS 不会把不同类型数据存储在同一个 page 上。每个 page 带着一个唯一的 id，DBMS 使用一个 indirection layer 将 page id 与数据实际存储的物理位置关联起来。&lt;/p>
-&lt;p>大多数DBMS使用固定大小的page，以避免支持可变大小page所需的工程开销。例如，对于可变大小的page，删除一个page可能会在文件中产生碎片，DBMS无法轻易地用新page来填充。注意：有几个不同的 page 概念需要分清楚：&lt;/p>
-&lt;ul>
-&lt;li>Hardware Page：通常大小为 4KB&lt;/li>
-&lt;li>OS Page: 通常大小为 4KB&lt;/li>
-&lt;li>Database Page：(1-16KB)&lt;/li>
-&lt;/ul>
+&lt;p>OS 的文件系统通常将文件切分成 pages 进行管理，DBMS 也不例外。通常 page 是固定大小的一块数据，每个 page 内部可能存储着 &lt;strong>tuples、meta-data、indexes&lt;/strong> 以及 &lt;strong>logs&lt;/strong> 等。
+大多数DBMS使用固定大小的page(1-16KB)，以避免支持可变大小page所需的工程开销。&lt;/p>
 &lt;p>不同 DBMS 管理 pages 的方式不同，主要分为以下几种：&lt;/p>
 &lt;ul>
 &lt;li>Heap File Organization&lt;/li>
@@ -117,21 +116,14 @@ DBMS还有一个执行引擎来执行查询。执行引擎将向缓冲池请求�
 &lt;li>Hashing File Organization&lt;/li>
 &lt;/ul>
 &lt;h3 id="heap-file-organization">Heap File Organization&lt;/h3>
-&lt;p>Heap file 是一个无序的 pages 集合，pages 管理模块需要记录哪些 pages 已经被使用，而哪些 pages 尚未被使用。主要有以下两种方法：&lt;/p>
+&lt;p>Heap file 是一个无序的 pages 集合，pages 管理模块需要记录哪些 pages 已经被使用，哪些尚未被使用。主要有以下两种方法：&lt;/p>
 &lt;ul>
 &lt;li>Linked List: Header page 持有指向&lt;code>free pages list&lt;/code>和&lt;code>data pages list&lt;/code>的指针。它必须在数据页列表上进行顺序扫描。&lt;/li>
 &lt;li>Page Directory: pages 管理模块维护着一些特殊的 pages（directory pages），它们负责记录 data pages 的位置和空闲空间大小。&lt;/li>
 &lt;/ul>
 &lt;h3 id="page-layout">Page Layout&lt;/h3>
-&lt;p>每个 page 被分为两个部分：header 和 data，header通常包含:&lt;/p>
-&lt;ul>
-&lt;li>Page Size&lt;/li>
-&lt;li>Checksum&lt;/li>
-&lt;li>DBMS Version&lt;/li>
-&lt;li>Transaction Visibility&lt;/li>
-&lt;li>Compression Information&lt;/li>
-&lt;/ul>
-&lt;p>data 中记录着真正存储的数据，数据记录的形式主要有:&lt;/p>
+&lt;p>每个 page 被分为两个部分：header 和 data，header通常包含：page大小, checksum, DBMS版本, 事务可见性, 压缩信息。
+data 中记录着真正存储的数据，数据记录的形式主要有:&lt;/p>
 &lt;ul>
 &lt;li>Tuple-oriented（slotted-pages）：记录数据本身&lt;/li>
 &lt;li>Log-structured：记录数据的操作日志&lt;/li>
@@ -139,20 +131,38 @@ DBMS还有一个执行引擎来执行查询。执行引擎将向缓冲池请求�
 &lt;h4 id="slotted-pages">Slotted Pages&lt;/h4>
 &lt;p>Tuple-oriented中，最常用的Layout方案是 &lt;strong>slotted pages&lt;/strong>。header 中的 slot array 记录每个 slot 的信息，如大小、位移等
 。
-&lt;img src="https://s2.loli.net/2023/03/16/fRCT7lZFDqxnNAk.png" alt="slotted_page.png">&lt;/p>
+&lt;img src="https://s2.loli.net/2023/03/17/8OELXjg5KDbVShA.png" alt="slotted_page">&lt;/p>
 &lt;ul>
 &lt;li>新增记录时：在 slot array 中新增一条记录，记录着改记录的入口地址。slot array 与 data 从 page 的两端向中间生长，二者相遇时，就认为这个 page 已经满了。&lt;/li>
 &lt;li>删除记录时：假设删除 tuple #3，可以将 slot array 中的第三条记录删除，并将 tuple #4 及其以后的数据都都向后移动，填补 tuple #3 的空位。&lt;/li>
-&lt;li>处理定长和变长 tuple 数据都游刃有余。&lt;/li>
 &lt;/ul>
 &lt;h4 id="log-structured">Log-Structured&lt;/h4>
-&lt;p>// TODO&lt;/p>
+&lt;p>Slotted-Page Design 带来的问题：&lt;/p>
+&lt;ul>
+&lt;li>Fragmentation：删除tuple会在page中留下碎片。&lt;/li>
+&lt;li>Useless Disk I/O：由于非易失性存储的block-oriented的性质，需要读取整个块来获取tuple。&lt;/li>
+&lt;li>Random Disk I/O：磁盘阅读器可能不得不跳到20个不同的地方来更新20个tuples，这可能会非常慢。&lt;/li>
+&lt;/ul>
+&lt;p>log-structured page 只存储更改（PUT, DELETE）的日志记录。因此，增删改的效率很高。
+为了读取一条记录，DBMS从最新到最旧扫描page并重新创建tuple。为了加快查询效率，通常会对操作日志在记录 id 上建立索引。
+还需要定期做日志压缩。&lt;/p>
 &lt;h3 id="tuple-layout">Tuple Layout&lt;/h3>
-&lt;p>DBMS需要一种方法来跟踪单个tuple。每个tuple被分配一个唯一的记录标识符。最常用的方式：&lt;code>page_id + offset/slot&lt;/code>。例如，PostgreSQL使用 CTID (6-bytes)，SQLite使用 ROWID (8-bytes)。
+&lt;p>每个 tuple 被分配一个唯一的记录标识符。最常用的方式：&lt;code>page_id + offset/slot&lt;/code>。例如，PostgreSQL使用 CTID (6-bytes)，SQLite使用 ROWID (8-bytes)。
 tuple 的元数据包含：&lt;/p>
 &lt;ul>
-&lt;li>Visibility Info (concurrency control)：tuple 粒度的权限和并发控制&lt;/li>
+&lt;li>Visibility Info (concurrency control)&lt;/li>
 &lt;li>Bit Map for NULL values&lt;/li>
+&lt;/ul>
+&lt;h2 id="oltp--olap">OLTP &amp;amp; OLAP&lt;/h2>
+&lt;ul>
+&lt;li>OLTP(Online Transaction Processing): 主要处理简单的读写语句，且每个语句都只操作数据库中的一小部分数据&lt;/li>
+&lt;li>OLAP(Online Analytical Processing): 主要处理复杂的，需要检索大量数据并聚合的操作&lt;/li>
+&lt;li>HTAP(Hybrid Transaction + Analytical Processing)&lt;/li>
+&lt;/ul>
+&lt;h2 id="storage-models">Storage Models&lt;/h2>
+&lt;ul>
+&lt;li>行存储：NSM (N-ary Storage Model)：将一个 tuple 的所有 attributes 在 page 中连续地存储，适合 OLTP 场景。&lt;/li>
+&lt;li>列存储：DSM (Decomposition Storage Model)：将所有 tuples 的单个 attribute 连续地存储在一个 page 中，适用于 OLAP 场景。&lt;/li>
 &lt;/ul></description><category domain="https://berylyvos.icu/categories/cmu15-445/">CMU15-445</category><category domain="https://berylyvos.icu/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</category><category domain="https://berylyvos.icu/tags/%E7%AC%94%E8%AE%B0/">笔记</category></item><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
 &lt;ul>
 &lt;li>多文件torrent下载&lt;/li>
