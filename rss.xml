@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Fri, 17 Mar 2023 11:19:13 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>CMU15-445(Fall 2022) 笔记：Pilot</title><link>https://berylyvos.icu/posts/15-445-note-1/</link><guid isPermaLink="true">https://berylyvos.icu/posts/15-445-note-1/</guid><pubDate>Sun, 05 Mar 2023 22:53:43 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="关系模型与关系代数">关系模型与关系代数&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Sat, 18 Mar 2023 13:23:37 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>CMU15-445(Fall 2022) 笔记：Pilot</title><link>https://berylyvos.icu/posts/15-445-note-1/</link><guid isPermaLink="true">https://berylyvos.icu/posts/15-445-note-1/</guid><pubDate>Sun, 05 Mar 2023 22:53:43 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="关系模型与关系代数">关系模型与关系代数&lt;/h1>
 &lt;blockquote>
 &lt;p>A database is an organized collection of inter-related data that models some aspect of the real-world.&lt;/p>
 &lt;/blockquote>
@@ -85,6 +85,7 @@
 &lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
 &lt;/div>
 &lt;/div>&lt;h1 id="存储">存储&lt;/h1>
+&lt;p>主要讨论“面向磁盘”的DBMS体系结构，该体系结构假设数据库的主要存储位置在non-volatile磁盘(SSD, HDD)上。&lt;/p>
 &lt;h2 id="面向磁盘的dbms">面向磁盘的DBMS&lt;/h2>
 &lt;p>&lt;img src="https://s2.loli.net/2023/03/17/7DgvBXJ4C5T1QsV.png" alt="disk-oriented-dbms">&lt;/p>
 &lt;p>数据库全部在磁盘上，数据库文件中的数据被组织成页，第一页是目录页。
@@ -133,7 +134,7 @@ data 中记录着真正存储的数据，数据记录的形式主要有:&lt;/p>
 。
 &lt;img src="https://s2.loli.net/2023/03/17/8OELXjg5KDbVShA.png" alt="slotted_page">&lt;/p>
 &lt;ul>
-&lt;li>新增记录时：在 slot array 中新增一条记录，记录着改记录的入口地址。slot array 与 data 从 page 的两端向中间生长，二者相遇时，就认为这个 page 已经满了。&lt;/li>
+&lt;li>新增记录时：在 slot array 中新增一条记录，存放该记录的入口地址。slot array 与 data 从 page 的两端向中间生长，二者相遇时，就认为这个 page 已经满了。&lt;/li>
 &lt;li>删除记录时：假设删除 tuple #3，可以将 slot array 中的第三条记录删除，并将 tuple #4 及其以后的数据都都向后移动，填补 tuple #3 的空位。&lt;/li>
 &lt;/ul>
 &lt;h4 id="log-structured">Log-Structured&lt;/h4>
