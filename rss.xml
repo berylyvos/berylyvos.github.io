@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Mon, 20 Mar 2023 15:24:32 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>CMU15-445(Fall 2022) 笔记：Hash Tables</title><link>https://berylyvos.icu/posts/15-445-note-hashtables/</link><guid isPermaLink="true">https://berylyvos.icu/posts/15-445-note-hashtables/</guid><pubDate>Mon, 20 Mar 2023 23:07:58 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="hash-table">Hash Table&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Wed, 22 Mar 2023 14:44:46 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>CMU15-445(Fall 2022) 笔记：Hash Tables</title><link>https://berylyvos.icu/posts/15-445-note-hashtables/</link><guid isPermaLink="true">https://berylyvos.icu/posts/15-445-note-hashtables/</guid><pubDate>Mon, 20 Mar 2023 23:07:58 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="hash-table">Hash Table&lt;/h1>
 &lt;h1 id="hash-function">Hash Function&lt;/h1>
 &lt;h1 id="static-hashing-schemes">Static Hashing Schemes&lt;/h1>
 &lt;h2 id="linear-probe-hashing">Linear Probe Hashing&lt;/h2>
@@ -171,9 +171,20 @@ tuple 的元数据包含：&lt;/p>
 &lt;/ul>
 &lt;h2 id="storage-models">Storage Models&lt;/h2>
 &lt;ul>
-&lt;li>行存储：NSM (N-ary Storage Model)：将一个 tuple 的所有 attributes 在 page 中连续地存储，适合 OLTP 场景。&lt;/li>
-&lt;li>列存储：DSM (Decomposition Storage Model)：将所有 tuples 的单个 attribute 连续地存储在一个 page 中，适用于 OLAP 场景。&lt;/li>
-&lt;/ul></description><category domain="https://berylyvos.icu/categories/cmu15-445/">CMU15-445</category><category domain="https://berylyvos.icu/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</category><category domain="https://berylyvos.icu/tags/%E7%AC%94%E8%AE%B0/">笔记</category></item><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
+&lt;li>行存储：NSM (N-ary Storage Model)：将一个 tuple 的所有 attributes 在 page 中连续存储，适合 OLTP 场景。
+&lt;ul>
+&lt;li>优点：增删改、查询整条记录较快&lt;/li>
+&lt;li>缺点：不适合对大块的tuples、部分attributes的操作&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>列存储：DSM (Decomposition Storage Model)：将所有 tuples 的单个 attribute 连续存储，适用于 OLAP 场景。
+&lt;ul>
+&lt;li>优点：按需查询，减少I/O、有利于数据压缩&lt;/li>
+&lt;li>缺点：点查询、增删改较慢&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>在列存储的情形下，有两种方法标识tuple：定长offset（每个attribute大小一样）、embedded_tuple_id。&lt;/p></description><category domain="https://berylyvos.icu/categories/cmu15-445/">CMU15-445</category><category domain="https://berylyvos.icu/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</category><category domain="https://berylyvos.icu/tags/%E7%AC%94%E8%AE%B0/">笔记</category></item><item><title>简单做个BitTorrent客户端</title><link>https://berylyvos.icu/posts/gorrent/</link><guid isPermaLink="true">https://berylyvos.icu/posts/gorrent/</guid><pubDate>Thu, 17 Nov 2022 11:15:54 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="功能">功能&lt;/h1>
 &lt;ul>
 &lt;li>多文件torrent下载&lt;/li>
 &lt;li>支持UDP/HTTP Tracker&lt;/li>
