@@ -1,10 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Wed, 22 Mar 2023 14:44:46 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>CMU15-445(Fall 2022) 笔记：Hash Tables</title><link>https://berylyvos.icu/posts/15-445-note-hashtables/</link><guid isPermaLink="true">https://berylyvos.icu/posts/15-445-note-hashtables/</guid><pubDate>Mon, 20 Mar 2023 23:07:58 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="hash-table">Hash Table&lt;/h1>
-&lt;h1 id="hash-function">Hash Function&lt;/h1>
-&lt;h1 id="static-hashing-schemes">Static Hashing Schemes&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Fri, 24 Mar 2023 15:45:26 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>CMU15-445(Fall 2022) 笔记：Hash Tables</title><link>https://berylyvos.icu/posts/15-445-note-hashtables/</link><guid isPermaLink="true">https://berylyvos.icu/posts/15-445-note-hashtables/</guid><pubDate>Mon, 20 Mar 2023 23:07:58 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="哈希表">哈希表&lt;/h1>
+&lt;p>哈希表实现了一个关联数组抽象数据类型，将键映射到值。它提供平均 O(1)，最坏 O(n) 的操作复杂度，以及 O(n) 的空间复杂度。即便平均操作复杂度为O(1)，实际中常需考虑&lt;strong>常数优化&lt;/strong>。&lt;/p>
+&lt;p>哈希表主要有两部分：哈希函数、哈希scheme。&lt;/p>
+&lt;h2 id="哈希函数">哈希函数&lt;/h2>
+&lt;p>哈希函数将一个大的键空间映射到较小的域中。它用于计算数组中的索引。我们需要考虑&lt;strong>执行效率和冲突率&lt;/strong>之间的权衡。在极端情况下，我们有一个哈希函数总是返回常量（非常快，但一切皆冲突）。在另一个极端，我们有一个“完美”的哈希函数，没有冲突，但计算时间会非常长。理想设计位于两者之间。&lt;/p>
+&lt;p>哈希函数接受任何键作为其输入。然后返回该键的整数表示（即“哈希”）。函数的输出是确定性的（相同的键应始终生成相同的哈希输出）。&lt;/p>
+&lt;p>DBMS不需要使用加密安全哈希函数（例如SHA-256），因为我们不需要担心保护密钥内容。这些哈希函数主要由DBMS在内部使用，因此信息不会泄漏到系统外部。&lt;/p>
+&lt;p>当前的SOTA哈希函数是&lt;a href="https://cyan4973.github.io/xxHash/">Facebook XXHash3&lt;/a>。&lt;/p>
+&lt;h2 id="哈希scheme">哈希Scheme&lt;/h2>
+&lt;p>如何在哈希后处理冲突就是哈希scheme要做的。此时，我们需要考虑分配一个大的哈希表以减少冲突和在发生冲突时执行额外操作之间的权衡。&lt;/p>
+&lt;h1 id="静态哈希schemes">静态哈希Schemes&lt;/h1>
+&lt;p>静态哈希scheme是指哈希表的大小是固定的。这意味着如果DBMS用完了哈希表中的存储空间，那么它必须从头开始重新构建一个更大的哈希表，这是非常昂贵的。通常新哈希表的大小是原来哈希表的两倍。&lt;/p>
 &lt;h2 id="linear-probe-hashing">Linear Probe Hashing&lt;/h2>
+&lt;p>这是最基本的哈希scheme。它通常也是最快的。它使用一个循环缓冲区来存储数组槽位。当发生冲突时，搜索下一个槽位，直到找到空位为止。删除操作可能会导致之后的查询出错。解决此问题最常见的方法是使用标记删除，标记告诉未来查询继续扫描下一个位置。&lt;/p>
 &lt;h2 id="robin-hood-hashing">Robin Hood Hashing&lt;/h2>
 &lt;h2 id="cuckoo-hashing">Cuckoo Hashing&lt;/h2>
-&lt;h1 id="dynamic-hashing-schemes">Dynamic Hashing Schemes&lt;/h1>
+&lt;h1 id="动态哈希schemes">动态哈希Schemes&lt;/h1>
 &lt;h2 id="chained-hashing">Chained Hashing&lt;/h2>
 &lt;h2 id="extendible-hashing">Extendible Hashing&lt;/h2>
 &lt;h2 id="linear-hashing">Linear Hashing&lt;/h2></description><category domain="https://berylyvos.icu/categories/cmu15-445/">CMU15-445</category><category domain="https://berylyvos.icu/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</category><category domain="https://berylyvos.icu/tags/%E7%AC%94%E8%AE%B0/">笔记</category><category domain="https://berylyvos.icu/tags/hashing-scheme/">Hashing Scheme</category></item><item><title>CMU15-445(Fall 2022) 笔记：Pilot</title><link>https://berylyvos.icu/posts/15-445-note-1/</link><guid isPermaLink="true">https://berylyvos.icu/posts/15-445-note-1/</guid><pubDate>Sun, 05 Mar 2023 22:53:43 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="关系模型与关系代数">关系模型与关系代数&lt;/h1>
