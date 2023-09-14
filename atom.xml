@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN"><title type="text">Shingo四叠半</title><subtitle type="html">This is Shigo Gnix's no interest blog.</subtitle><updated>2023-05-28T15:38:01+00:00</updated><id>https://berylyvos.icu/</id><link rel="alternate" type="text/html" href="https://berylyvos.icu/"/><link rel="self" type="application/atom+xml" href="https://berylyvos.icu/atom.xml"/><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><generator uri="https://gohugo.io/" version="0.104.3">Hugo</generator><entry><title type="text">CMU15-445(Fall 2022) 笔记：Hash Tables</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/15-445-note-hashtables/"/><id>https://berylyvos.icu/posts/15-445-note-hashtables/</id><updated>2023-05-28T15:37:59+00:00</updated><published>2023-03-20T23:07:58+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">哈希表 哈希表实现了一个关联数组抽象数据类型，将键映射到值。它提供平均 O(1)，最坏 O(n)……</summary><content type="html">&lt;h1 id="哈希表">哈希表&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN"><title type="text">Shingo四叠半</title><subtitle type="html">This is Shigo Gnix's no interest blog.</subtitle><updated>2023-09-14T15:03:52+00:00</updated><id>https://berylyvos.icu/</id><link rel="alternate" type="text/html" href="https://berylyvos.icu/"/><link rel="self" type="application/atom+xml" href="https://berylyvos.icu/atom.xml"/><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><generator uri="https://gohugo.io/" version="0.104.3">Hugo</generator><entry><title type="text">CMU15-445(Fall 2022) 笔记：Hash Tables</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/15-445-note-hashtables/"/><id>https://berylyvos.icu/posts/15-445-note-hashtables/</id><updated>2023-09-14T15:03:49+00:00</updated><published>2023-03-20T23:07:58+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">哈希表 哈希表实现了一个关联数组抽象数据类型，将键映射到值。它提供平均 O(1)，最坏 O(n)……</summary><content type="html">&lt;h1 id="哈希表">哈希表&lt;/h1>
 &lt;p>哈希表实现了一个关联数组抽象数据类型，将键映射到值。它提供平均 O(1)，最坏 O(n) 的操作复杂度，以及 O(n) 的空间复杂度。即便平均操作复杂度为O(1)，实际中常需考虑&lt;strong>常数优化&lt;/strong>。&lt;/p>
 &lt;p>哈希表主要有两部分：哈希函数、哈希方案。&lt;/p>
 &lt;h2 id="哈希函数">哈希函数&lt;/h2>
@@ -15,34 +15,40 @@
 &lt;h2 id="robin-hood">Robin Hood&lt;/h2>
 &lt;p>Linear Probe 的扩展，其思想是尽量减少每个键与它们在哈希表中的最佳位置(即它们被哈希到的原始槽)的最大距离。该策略窃取“富键”（距离较小）的槽，将它们提供给“穷键”，故称为“罗宾汉哈希”。&lt;/p>
 &lt;h2 id="cuckoo">Cuckoo&lt;/h2>
-&lt;p>使用具有不同哈希函数种子的多个哈希表。在插入时，检查每个表并选择任意一个有空闲槽的表。如果没有表有空闲槽，则从其中一个表中驱逐元素，然后重新哈希它，找到一个新位置。极少数情况可能会死循环。我们可以使用新的哈希函数种子重新构建所有哈希表(不太常见)，或者使用更大的表重新构建哈希表(更常见)。&lt;/p>
-&lt;p>由于每个哈希表只检查一个位置，Cuckoo 哈希方案保证了&lt;strong>删除和查询&lt;/strong>的时间复杂度总是 &lt;strong>O(1)&lt;/strong>。&lt;/p>
+&lt;p>“布谷鸟哈希”，使用具有不同哈希函数种子的多个哈希表。在插入时，检查每个表并选择任意一个有空闲槽的表。如果没有表有空闲槽，则从其中一个表中驱逐元素，然后重新哈希它，找到一个新位置。极少数情况可能会死循环。我们可以使用新的哈希函数种子重新构建所有哈希表(不太常见)，或者使用更大的表重新构建哈希表(更常见)。&lt;/p>
+&lt;p>由于每个哈希表只检查一个位置，Cuckoo 哈希方案保证了删除和查询的时间复杂度总是O(1)。&lt;/p>
 &lt;h1 id="动态哈希方案">动态哈希方案&lt;/h1>
 &lt;p>静态哈希方案要求DBMS提前知道它想要存储的元素的数量。否则，如果需要扩容/收缩，则必须重建整个哈希表。动态的哈希方案能够按需调整哈希表的大小，而无需重建整个表。&lt;/p>
 &lt;h2 id="chained">Chained&lt;/h2>
-&lt;p>拉链法，最常见的动态哈希方案。&lt;/p>
+&lt;p>链式哈希，最常见的动态哈希方案。常用的拉链法就是桶大小为1的链式哈希。&lt;/p>
 &lt;h2 id="extendible">EXTENDIBLE&lt;/h2>
-&lt;p>改进的拉链法，它会分裂桶而不是让链条无限增长。这种方法允许哈希表中的多个槽指向同一个桶链。&lt;/p>
-&lt;p>重新平衡哈希表的核心思想是在分裂时移动桶条目并增加查找哈希表中条目所需比特数。这意味着DBMS只需要在拆分链的桶内移动数据，其他桶都保持不变。&lt;/p>
+&lt;p>改进的链式哈希，它会分裂桶而不是让链条无限增长。&lt;/p>
 &lt;ul>
-&lt;li>DBMS维护全局和本地深度位计数，确定在槽数组中查找桶所需的位数。&lt;/li>
-&lt;li>当一个桶满时，DBMS会将其拆分并重新排列其中元素。如果拆分后新建立的桶本地深度小于全局深度，则该新建立的桶仅添加到现有槽数组中。否则，DBMS将槽数组大小加倍，并递增全局深度计数器。&lt;/li>
+&lt;li>通过倍增目录，实现桶数量的倍增。&lt;/li>
+&lt;li>只分裂发生溢出的桶。&lt;/li>
+&lt;li>全局深度：目录倍增的次数。用于判断&lt;code>key&lt;/code>属于哪个桶，&lt;code>hash(key)&lt;/code>需要的最低有效位数。&lt;/li>
+&lt;li>局部深度：桶分裂的次数。用来判断分裂桶是否会导致目录倍增。&lt;/li>
+&lt;li>插入时桶满了：
+&lt;ul>
+&lt;li>若桶局部深度等于全局深度，目录倍增，全局深度加一；同时分裂桶，桶局部深度加一。&lt;/li>
+&lt;li>若桶局部深度小于全局深度，只分裂桶，增加局部深度。&lt;/li>
+&lt;li>维护目录指针指向新桶。&lt;/li>
+&lt;/ul>
+&lt;/li>
 &lt;/ul>
 &lt;h2 id="linear">Linear&lt;/h2>
-&lt;p>这种方案不是在桶溢出时立即分裂，而是维护一个分裂指针来跟踪下一个要分裂的桶。无论该指针是否指向了溢出的桶，DBMS 都会进行拆分。溢出标准由实现决定。&lt;/p>
+&lt;p>Extendible的改进版。主要思想是渐进式倍增目录，减少单点延时。这种方案不是在桶溢出时立即分裂该桶，而是维护一个分裂指针来跟踪下一个要分裂的槽。无论该槽的指针是否指向了溢出桶，都会进行拆分。&lt;/p>
 &lt;ul>
-&lt;li>当任何一个桶溢出时，在指针位置处通过添加新的槽和创建新哈希函数来拆分该桶。&lt;/li>
-&lt;li>如果哈希函数映射到先前被指针所指向的槽，则应用新哈希函数。&lt;/li>
-&lt;li>当指针达到最后一个槽时，删除原始哈希函数并替换为新哈希函数。&lt;/li>
-&lt;/ul></content><category scheme="https://berylyvos.icu/categories/cmu15-445/" term="CMU15-445" label="CMU15-445"/><category scheme="https://berylyvos.icu/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" term="数据库" label="数据库"/><category scheme="https://berylyvos.icu/tags/%E7%AC%94%E8%AE%B0/" term="笔记" label="笔记"/><category scheme="https://berylyvos.icu/tags/hashing-scheme/" term="Hashing Scheme" label="Hashing Scheme"/></entry><entry><title type="text">CMU15-445(Fall 2022) 笔记：Pilot</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/15-445-note-1/"/><id>https://berylyvos.icu/posts/15-445-note-1/</id><updated>2023-05-28T15:37:59+00:00</updated><published>2023-03-05T22:53:43+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">关系模型与关系代数 A database is an organized collection of inter-related data that models some aspect of the real-world. 不要混淆“数据库(database……</summary><content type="html">&lt;h1 id="关系模型与关系代数">关系模型与关系代数&lt;/h1>
+&lt;li>当任何一个桶满时，该桶指向存放新元素的溢出桶；后将分裂指针指向的槽进行分裂，新槽被添加至目录的末尾，并创建一个新的哈希函数。&lt;/li>
+&lt;li>当分裂指针到达最后一个未分裂槽时，将原始哈希函数替换为新哈希函数。&lt;/li>
+&lt;/ul></content><category scheme="https://berylyvos.icu/categories/cmu15-445/" term="CMU15-445" label="CMU15-445"/><category scheme="https://berylyvos.icu/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" term="数据库" label="数据库"/><category scheme="https://berylyvos.icu/tags/%E7%AC%94%E8%AE%B0/" term="笔记" label="笔记"/><category scheme="https://berylyvos.icu/tags/hashing-scheme/" term="Hashing Scheme" label="Hashing Scheme"/></entry><entry><title type="text">CMU15-445(Fall 2022) 笔记：Pilot</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/15-445-note-1/"/><id>https://berylyvos.icu/posts/15-445-note-1/</id><updated>2023-09-14T15:03:49+00:00</updated><published>2023-03-05T22:53:43+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">关系模型与关系代数 A database is an organized collection of inter-related data that models some aspect of the real-world. A DBMS is a software that allows applications to store and analyze information in a database. 不……</summary><content type="html">&lt;h1 id="关系模型与关系代数">关系模型与关系代数&lt;/h1>
 &lt;blockquote>
-&lt;p>A database is an organized collection of inter-related data that models some aspect of the real-world.&lt;/p>
+&lt;p>A &lt;strong>database&lt;/strong> is an organized collection of inter-related &lt;strong>data&lt;/strong> that models some aspect of the real-world.&lt;/p>
 &lt;/blockquote>
-&lt;p>不要混淆“数据库(database)”和“数据库管理系统(database management system, DBMS)”。&lt;/p>
 &lt;blockquote>
-&lt;p>A DBMS is a software that allows applications to store and analyze information in a database.&lt;/p>
+&lt;p>A &lt;strong>DBMS&lt;/strong> is a &lt;strong>software&lt;/strong> that allows applications to store and analyze information in a database.&lt;/p>
 &lt;/blockquote>
-&lt;p>MySQL, Oracle, MongoDB, Snowflake这些都是DBMS。&lt;/p>
+&lt;p>不要混淆“数据库(database)”和“数据库管理系统(database management system, DBMS)”。PostgreSQL, Oracle, MongoDB, Snowflake这些都是DBMS。&lt;/p>
 &lt;p>&lt;strong>关系模型&lt;/strong>基于关系定义数据库抽象，解耦合逻辑层与物理层。&lt;/p>
 &lt;ul>
 &lt;li>将数据库存储在简单的数据结构(关系)中。&lt;/li>
@@ -57,9 +63,6 @@
 &lt;p>&lt;strong>关系代数&lt;/strong>是一种Procedural语言，因为它定义了如何计算查询的high-level步骤（比如先做join还是projection，这对于查询优化很重要）&lt;/p>
 &lt;h1 id="现代sql">现代SQL&lt;/h1>
 &lt;p>SQL是关系数据库的Declarative的查询语言。当前SQL的标准是SQL-2016，目前大部分DBMS至少支持SQL-92标准。&lt;/p>
-&lt;h2 id="count-count1-countcolumn">count(*), count(1), count(column)&lt;/h2>
-&lt;p>&lt;code>count(*)&lt;/code>和&lt;code>count(1)&lt;/code>从结果上看是一致的。这里的&lt;code>*&lt;/code>和&lt;code>1&lt;/code>并不是指查询的列的数量，即便是&lt;code>count('whatever the parameter is')&lt;/code>也是一样的结果。传入给&lt;code>count()&lt;/code>的参数会赋值给表的每一行，&lt;code>count()&lt;/code>函数会计算该参数一共被赋值了几次，即表的行数。
-&lt;code>count(column)&lt;/code>只统计&lt;code>column != NULL&lt;/code>的行。&lt;/p>
 &lt;h2 id="窗口函数">窗口函数&lt;/h2>
 &lt;p>窗口函数在一组相关的元组之间执行“滑动”计算。类似于聚合，但元组不是分组合并到单个输出元组，而是每个元组新增了一列窗口函数的计算结果。
 除了普通聚合函数外，还有些特殊的窗口函数，如&lt;code>ROW_NUMBER()&lt;/code>和&lt;code>RANK()&lt;/code>。&lt;/p>
@@ -211,7 +214,7 @@ tuple 的元数据包含：&lt;/p>
 &lt;/ul>
 &lt;/li>
 &lt;/ul>
-&lt;p>在列存储的情形下，有两种方法标识tuple：定长offset（每个attribute大小一样）、embedded_tuple_id。&lt;/p></content><category scheme="https://berylyvos.icu/categories/cmu15-445/" term="CMU15-445" label="CMU15-445"/><category scheme="https://berylyvos.icu/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" term="数据库" label="数据库"/><category scheme="https://berylyvos.icu/tags/%E7%AC%94%E8%AE%B0/" term="笔记" label="笔记"/></entry><entry><title type="text">简单做个BitTorrent客户端</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/gorrent/"/><id>https://berylyvos.icu/posts/gorrent/</id><updated>2023-05-28T15:37:59+00:00</updated><published>2022-11-17T11:15:54+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">功能 多文件torrent下载 支持UDP/HTTP Tracker 支持DHT，PeX，磁力链接 Gol……</summary><content type="html">&lt;h1 id="功能">功能&lt;/h1>
+&lt;p>在列存储的情形下，有两种方法标识tuple：定长offset（每个attribute大小一样）、embedded_tuple_id。&lt;/p></content><category scheme="https://berylyvos.icu/categories/cmu15-445/" term="CMU15-445" label="CMU15-445"/><category scheme="https://berylyvos.icu/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" term="数据库" label="数据库"/><category scheme="https://berylyvos.icu/tags/%E7%AC%94%E8%AE%B0/" term="笔记" label="笔记"/></entry><entry><title type="text">简单做个BitTorrent客户端</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/gorrent/"/><id>https://berylyvos.icu/posts/gorrent/</id><updated>2023-09-14T15:03:49+00:00</updated><published>2022-11-17T11:15:54+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">功能 多文件torrent下载 支持UDP/HTTP Tracker 支持DHT，PeX，磁力链接 Gol……</summary><content type="html">&lt;h1 id="功能">功能&lt;/h1>
 &lt;ul>
 &lt;li>多文件torrent下载&lt;/li>
 &lt;li>支持UDP/HTTP Tracker&lt;/li>
@@ -436,7 +439,7 @@ tuple 的元数据包含：&lt;/p>
 &lt;li>&lt;a href="https://blog.jse.li/posts/torrent">Building a BitTorrent client from the ground up in Go&lt;/a>&lt;/li>
 &lt;li>&lt;a href="http://bittorrent.org/beps/bep_0015.html">BEP-15: UDP Tracker Protocol for BitTorrent&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://lifehacker.com/bittorrent-s-future-dht-pex-and-magnet-links-explain-5411311">BitTorrent’s Future: DHT, PEX, and Magnet Links Explained&lt;/a>&lt;/li>
-&lt;/ul></content><category scheme="https://berylyvos.icu/categories/%E7%8E%A9/" term="玩" label="玩"/><category scheme="https://berylyvos.icu/tags/golang/" term="Golang" label="Golang"/><category scheme="https://berylyvos.icu/tags/bittorrent/" term="BitTorrent" label="BitTorrent"/></entry><entry><title type="text">void kernel</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/hello-world/"/><id>https://berylyvos.icu/posts/hello-world/</id><updated>2023-05-28T15:37:59+00:00</updated><published>2022-11-11T01:38:56+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">Hello Okay, this is Crazy. void kernel 1 2 3 4 ++++++++++[&amp;gt;+++++++&amp;gt;+++++++++++&amp;gt;+++&amp;lt;&amp;lt;&amp;lt;-] &amp;gt;++++++++.&amp;gt;+.&amp;gt;++.&amp;lt;&amp;lt;-------.&amp;gt;------.+++++ ++++.------.&amp;gt;.&amp;lt;&amp;lt;-.&amp;gt;+++++++++.----------- -------.++++++++.&amp;gt;.&amp;lt;&amp;lt;+++++++.&amp;gt;------.&amp;gt;+. Good -2147483648 AcWing 291. 蒙德里安的梦想 求把 $N×M$ 的棋盘分割成若干个……</summary><content type="html">&lt;h1 id="hello">Hello&lt;/h1>
+&lt;/ul></content><category scheme="https://berylyvos.icu/categories/%E7%8E%A9/" term="玩" label="玩"/><category scheme="https://berylyvos.icu/tags/golang/" term="Golang" label="Golang"/><category scheme="https://berylyvos.icu/tags/bittorrent/" term="BitTorrent" label="BitTorrent"/></entry><entry><title type="text">void kernel</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/hello-world/"/><id>https://berylyvos.icu/posts/hello-world/</id><updated>2023-09-14T15:03:49+00:00</updated><published>2022-11-11T01:38:56+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">Hello Okay, this is Crazy. void kernel 1 2 3 4 ++++++++++[&amp;gt;+++++++&amp;gt;+++++++++++&amp;gt;+++&amp;lt;&amp;lt;&amp;lt;-] &amp;gt;++++++++.&amp;gt;+.&amp;gt;++.&amp;lt;&amp;lt;-------.&amp;gt;------.+++++ ++++.------.&amp;gt;.&amp;lt;&amp;lt;-.&amp;gt;+++++++++.----------- -------.++++++++.&amp;gt;.&amp;lt;&amp;lt;+++++++.&amp;gt;------.&amp;gt;+. Good -2147483648 AcWing 291. 蒙德里安的梦想 求把 $N×M$ 的棋盘分割成若干个……</summary><content type="html">&lt;h1 id="hello">Hello&lt;/h1>
 &lt;hr>
 &lt;p>Okay,&lt;br>
 this is Crazy.&lt;/p>
