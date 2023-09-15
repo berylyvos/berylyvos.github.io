@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Thu, 14 Sep 2023 15:03:52 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>CMU15-445(Fall 2022) 笔记：Hash Tables</title><link>https://berylyvos.icu/posts/15-445-note-hashtables/</link><guid isPermaLink="true">https://berylyvos.icu/posts/15-445-note-hashtables/</guid><pubDate>Mon, 20 Mar 2023 23:07:58 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="哈希表">哈希表&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Fri, 15 Sep 2023 09:49:04 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>CMU15-445(Fall 2022) 笔记：Hash Tables</title><link>https://berylyvos.icu/posts/15-445-note-hashtables/</link><guid isPermaLink="true">https://berylyvos.icu/posts/15-445-note-hashtables/</guid><pubDate>Mon, 20 Mar 2023 23:07:58 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="哈希表">哈希表&lt;/h1>
 &lt;p>哈希表实现了一个关联数组抽象数据类型，将键映射到值。它提供平均 O(1)，最坏 O(n) 的操作复杂度，以及 O(n) 的空间复杂度。即便平均操作复杂度为O(1)，实际中常需考虑&lt;strong>常数优化&lt;/strong>。&lt;/p>
 &lt;p>哈希表主要有两部分：哈希函数、哈希方案。&lt;/p>
 &lt;h2 id="哈希函数">哈希函数&lt;/h2>
@@ -8,20 +8,20 @@
 &lt;p>当前的SOTA哈希函数是&lt;a href="https://cyan4973.github.io/xxHash/">Facebook XXHash3&lt;/a>。&lt;/p>
 &lt;h2 id="哈希方案">哈希方案&lt;/h2>
 &lt;p>如何在哈希后处理冲突就是哈希方案要做的。此时，我们需要考虑分配一个大的哈希表以减少冲突和在发生冲突时执行额外操作之间的权衡。&lt;/p>
-&lt;h1 id="静态哈希方案">静态哈希方案&lt;/h1>
+&lt;h2 id="静态哈希方案">静态哈希方案&lt;/h2>
 &lt;p>静态哈希方案是指哈希表的大小是固定的。这意味着如果DBMS用完了哈希表中的存储空间，那么它必须从头开始重新构建一个更大的哈希表，这是非常昂贵的。通常新哈希表的大小是原来哈希表的两倍。&lt;/p>
-&lt;h2 id="linear-probe">Linear Probe&lt;/h2>
+&lt;h3 id="linear-probe">Linear Probe&lt;/h3>
 &lt;p>开放寻址法，最基本的哈希方案。它通常也是最快的。它使用一个循环缓冲区来存储数组槽位。当发生冲突时，搜索下一个槽位，直到找到空位为止。删除操作可能会导致之后的查询出错。解决此问题最常见的方法是使用标记删除，标记告诉未来查询继续扫描下一个位置。&lt;/p>
-&lt;h2 id="robin-hood">Robin Hood&lt;/h2>
+&lt;h3 id="robin-hood">Robin Hood&lt;/h3>
 &lt;p>Linear Probe 的扩展，其思想是尽量减少每个键与它们在哈希表中的最佳位置(即它们被哈希到的原始槽)的最大距离。该策略窃取“富键”（距离较小）的槽，将它们提供给“穷键”，故称为“罗宾汉哈希”。&lt;/p>
-&lt;h2 id="cuckoo">Cuckoo&lt;/h2>
+&lt;h3 id="cuckoo">Cuckoo&lt;/h3>
 &lt;p>“布谷鸟哈希”，使用具有不同哈希函数种子的多个哈希表。在插入时，检查每个表并选择任意一个有空闲槽的表。如果没有表有空闲槽，则从其中一个表中驱逐元素，然后重新哈希它，找到一个新位置。极少数情况可能会死循环。我们可以使用新的哈希函数种子重新构建所有哈希表(不太常见)，或者使用更大的表重新构建哈希表(更常见)。&lt;/p>
 &lt;p>由于每个哈希表只检查一个位置，Cuckoo 哈希方案保证了删除和查询的时间复杂度总是O(1)。&lt;/p>
-&lt;h1 id="动态哈希方案">动态哈希方案&lt;/h1>
+&lt;h2 id="动态哈希方案">动态哈希方案&lt;/h2>
 &lt;p>静态哈希方案要求DBMS提前知道它想要存储的元素的数量。否则，如果需要扩容/收缩，则必须重建整个哈希表。动态的哈希方案能够按需调整哈希表的大小，而无需重建整个表。&lt;/p>
-&lt;h2 id="chained">Chained&lt;/h2>
+&lt;h3 id="chained">Chained&lt;/h3>
 &lt;p>链式哈希，最常见的动态哈希方案。常用的拉链法就是桶大小为1的链式哈希。&lt;/p>
-&lt;h2 id="extendible">EXTENDIBLE&lt;/h2>
+&lt;h3 id="extendible">EXTENDIBLE&lt;/h3>
 &lt;p>改进的链式哈希，它会分裂桶而不是让链条无限增长。&lt;/p>
 &lt;ul>
 &lt;li>通过倍增目录，实现桶数量的倍增。&lt;/li>
@@ -36,19 +36,21 @@
 &lt;/ul>
 &lt;/li>
 &lt;/ul>
-&lt;h2 id="linear">Linear&lt;/h2>
+&lt;h3 id="linear">Linear&lt;/h3>
 &lt;p>Extendible的改进版。主要思想是渐进式倍增目录，减少单点延时。这种方案不是在桶溢出时立即分裂该桶，而是维护一个分裂指针来跟踪下一个要分裂的槽。无论该槽的指针是否指向了溢出桶，都会进行拆分。&lt;/p>
 &lt;ul>
 &lt;li>当任何一个桶满时，该桶指向存放新元素的溢出桶；后将分裂指针指向的槽进行分裂，新槽被添加至目录的末尾，并创建一个新的哈希函数。&lt;/li>
 &lt;li>当分裂指针到达最后一个未分裂槽时，将原始哈希函数替换为新哈希函数。&lt;/li>
-&lt;/ul></description><category domain="https://berylyvos.icu/categories/cmu15-445/">CMU15-445</category><category domain="https://berylyvos.icu/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</category><category domain="https://berylyvos.icu/tags/%E7%AC%94%E8%AE%B0/">笔记</category><category domain="https://berylyvos.icu/tags/hashing-scheme/">Hashing Scheme</category></item><item><title>CMU15-445(Fall 2022) 笔记：Pilot</title><link>https://berylyvos.icu/posts/15-445-note-1/</link><guid isPermaLink="true">https://berylyvos.icu/posts/15-445-note-1/</guid><pubDate>Sun, 05 Mar 2023 22:53:43 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="关系模型与关系代数">关系模型与关系代数&lt;/h1>
+&lt;/ul></description><category domain="https://berylyvos.icu/categories/cmu15-445/">CMU15-445</category><category domain="https://berylyvos.icu/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</category><category domain="https://berylyvos.icu/tags/%E7%AC%94%E8%AE%B0/">笔记</category><category domain="https://berylyvos.icu/tags/hashing-scheme/">Hashing Scheme</category></item><item><title>CMU15-445(Fall 2022) 笔记：Pilot</title><link>https://berylyvos.icu/posts/15-445-note-1/</link><guid isPermaLink="true">https://berylyvos.icu/posts/15-445-note-1/</guid><pubDate>Sun, 05 Mar 2023 22:53:43 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="intro">Intro&lt;/h1>
+&lt;h2 id="dbms">DBMS&lt;/h2>
 &lt;blockquote>
 &lt;p>A &lt;strong>database&lt;/strong> is an organized collection of inter-related &lt;strong>data&lt;/strong> that models some aspect of the real-world.&lt;/p>
 &lt;/blockquote>
 &lt;blockquote>
 &lt;p>A &lt;strong>DBMS&lt;/strong> is a &lt;strong>software&lt;/strong> that allows applications to store and analyze information in a database.&lt;/p>
 &lt;/blockquote>
-&lt;p>不要混淆“数据库(database)”和“数据库管理系统(database management system, DBMS)”。PostgreSQL, Oracle, MongoDB, Snowflake这些都是DBMS。&lt;/p>
+&lt;p>不要混淆“数据库(database)”和“数据库管理系统(database management system, DBMS)”。PostgreSQL, Oracle, SQLite, Snowflake这些都是DBMS。&lt;/p>
+&lt;h2 id="关系模型与关系代数">关系模型与关系代数&lt;/h2>
 &lt;p>&lt;strong>关系模型&lt;/strong>基于关系定义数据库抽象，解耦合逻辑层与物理层。&lt;/p>
 &lt;ul>
 &lt;li>将数据库存储在简单的数据结构(关系)中。&lt;/li>
