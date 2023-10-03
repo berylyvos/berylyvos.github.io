@@ -1,4 +1,35 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Fri, 15 Sep 2023 10:44:41 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>CMU15-445(Fall 2022) 笔记：Hash Tables</title><link>https://berylyvos.icu/posts/15-445-note-hashtables/</link><guid isPermaLink="true">https://berylyvos.icu/posts/15-445-note-hashtables/</guid><pubDate>Mon, 20 Mar 2023 23:07:58 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="哈希表">哈希表&lt;/h1>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Tue, 03 Oct 2023 16:01:17 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>DuckDB中自适应基数树的持久化存储</title><link>https://berylyvos.icu/posts/persistent-storage-of-adaptive-radix-trees-in-duckdb/</link><guid isPermaLink="true">https://berylyvos.icu/posts/persistent-storage-of-adaptive-radix-trees-in-duckdb/</guid><pubDate>Mon, 02 Oct 2023 23:47:32 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;blockquote>
+&lt;p>原文：https://duckdb.org/2022/07/27/art-storage.html&lt;/p>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;p>&lt;strong>tl;dr&lt;/strong>:
+DuckDB使用自适应基数树（ART）索引来强制执行约束条件并加速查询过滤。到目前为止，索引未持久化存储，导致索引信息丢失、重载具有数据约束的表的时间较长等问题。我们现在将ART索引持久化存储到磁盘上，大大缩短了数据库加载时间（高达数量级），并且不再丢失现有索引的跟踪。本博文深入探讨了ART存储的实现、基准测试和未来工作。&lt;/p>
+&lt;/blockquote>
+&lt;p>DuckDB使用&lt;a href="https://db.in.tum.de/~leis/papers/ART.pdf">ART索引&lt;/a>来维护主键（PK）、外键（FK）和唯一约束。它们还加速了点查询、范围查询（具有高选择性）和连接操作。在最新版本之前（或V0.4.1），DuckDB没有将ART索引持久化存储到磁盘上。在存储数据库文件时，只会存储有关现有PK和FK的信息，所有其他索引都是临时的，重启数据库时丢失。对于PK和FK，它们在重载数据库时会被完全重建，从而导致加载时间较长的不便。&lt;/p>
+&lt;p>关于ART索引已经发表了大量研究工作，尤其是关于&lt;a href="https://db.in.tum.de/~leis/papers/artsync.pdf">同步&lt;/a>、&lt;a href="https://dbis.uibk.ac.at/sites/default/files/2018-06/hot-height-optimized.pdf">缓存效率&lt;/a>和&lt;a href="https://bigdata.uni-saarland.de/publications/ARCD15.pdf">评估&lt;/a>方面。然而，迄今为止，还没有公开的关于序列化和缓冲区管理ART树的信息。&lt;/p>
+&lt;p>本博文将描述DuckDB如何存储和加载ART索引。特别是解释索引是如何懒加载的（只有在必要时才将ART节点加载到内存中）。在ART索引部分，我们将介绍什么是ART索引，它是如何工作的，并提供一些示例。在DuckDB中的ART部分，我们将解释为什么决定在DuckDB中使用ART索引，以及在哪些地方使用它，讨论不持久化ART索引的问题。在ART存储部分，我们将解释如何在DuckDB中对ART索引进行序列化和缓冲区管理。在基准测试部分，我们将比较DuckDB v0.4.0（ART存储之前的版本）与DuckDB的最新版本。我们将展示在这两个版本中PK和FK的加载成本之间的差异，以及懒加载ART索引和访问完全加载的ART索引之间的差异。最后，在指南部分，我们将讨论当前实现的缺点以及未来ART索引改进计划。&lt;/p>
+&lt;h2 id="art索引">ART索引&lt;/h2>
+&lt;p>自适应基数树本质上是一种垂直和水平压缩的紧凑型Trie。&lt;/p>
+&lt;h3 id="trie">Trie&lt;/h3>
+&lt;p>Trie是一种树状数据结构，其中每个树级别包含关于数据集的一部分信息。它们通常以字符串为例进行说明。在下图中，你可以看到一个包含字符串&lt;code>pedro&lt;/code>、&lt;code>paulo&lt;/code>和&lt;code>peri&lt;/code>的Trie。&lt;/p>
+&lt;p>&lt;img src="https://duckdb.org/images/blog/ART/string-trie.png" alt="string_trie">&lt;/p>
+&lt;p>Trie的主要优势在于其具有O(k)的查找时间复杂度，这意味着在最坏情况下，查找操作的成本将等于字符串的长度k。&lt;/p>
+&lt;p>实际上，Trie也可以用于存储数值数据类型。但是，如果像字符串一样逐个字符地存储它们，将会浪费空间。例如，考虑类型&lt;code>uint64_t&lt;/code>，占据了64位（8字节）的空间。&lt;code>uint64_t&lt;/code>的最大值是18,446,744,073,709,551,615。因此，如果我们像上面的示例一样表示它，我们需要17个Trie层级。在实际中，Trie根据&lt;strong>位扇出&lt;/strong>（bit fan-out）创建，扇出指定了每个Trie层级表示多少位。一个带有8位扇出的&lt;code>uint64_t&lt;/code> Trie最多有8层，每层表示一个字节。&lt;/p>
+&lt;p>在下面的示例中，我们有一个Trie，用于索引值7、10和12。每个节点由0和1两个位组成，和一个指针（*表示非空，Ø表示空）。与之前的字符串Trie类似，Trie的每个层级都表示两个位，指针指向子节点。最后，叶子节点指向实际的数据。&lt;/p>
+&lt;p>&lt;img src="https://duckdb.org/images/blog/ART/2-bit-trie.png" alt="2-bit-trie">&lt;/p>
+&lt;p>很快可以注意到，这种Trie表示在两个方面都是浪费的。首先，许多节点只有一个子节点（即一个路径），这可以通过&lt;strong>垂直压缩&lt;/strong>（基数树）来合并。其次，许多节点具有空指针，占用了空间但没有包含任何信息，这可以通过&lt;strong>水平压缩&lt;/strong>来解决。&lt;/p>
+&lt;h3 id="垂直压缩rt">垂直压缩（RT）&lt;/h3>
+&lt;p>垂直压缩的基本思想是合并具有只有一个子节点的路径。为了支持这一点，节点存储一个前缀，包含压缩到该节点的路径。下图可以看到前两个节点只有一个子节点。这些节点可以折叠到第三个节点（即第一个分叉的节点）作为前缀路径。在查找时，关键字必须匹配前缀路径中包含的所有值。&lt;/p>
+&lt;p>&lt;img src="https://duckdb.org/images/blog/ART/2-bit-collapse-trie.png" alt="2-bit-collapse-trie">&lt;/p>
+&lt;p>下图中，可以看到经过垂直压缩后的Trie。这种Trie变体通常被称为&lt;strong>基数树&lt;/strong>（Radix Tree）。虽然通过这种Trie变体已经节省了很多浪费的空间，但仍然有许多具有空指针的节点。&lt;/p>
+&lt;p>&lt;img src="https://duckdb.org/images/blog/ART/2-bit-collapse-trie-result.png" alt="2-bit-collapse-trie-result">&lt;/p>
+&lt;h3 id="水平压缩art">水平压缩（ART）&lt;/h3>
+&lt;p>为了充分理解ART索引背后的设计决策，我们首先需要将2位扇出扩展到8位，这是DBMS中常见的扇出值。&lt;/p>
+&lt;p>&lt;img src="https://duckdb.org/images/blog/ART/8-bit-radix-tree.png" alt="8-bit-radix-tree">&lt;/p>
+&lt;h2 id="duckdb中的art">DuckDB中的ART&lt;/h2>
+&lt;h2 id="art存储">ART存储&lt;/h2>
+&lt;h2 id="基准测试">基准测试&lt;/h2>
+&lt;h2 id="后续工作">后续工作&lt;/h2></description><category domain="https://berylyvos.icu/categories/db/">db</category><category domain="https://berylyvos.icu/tags/art/">ART</category><category domain="https://berylyvos.icu/tags/%E7%B4%A2%E5%BC%95/">索引</category><category domain="https://berylyvos.icu/tags/duckdb/">DuckDB</category><category domain="https://berylyvos.icu/tags/%E5%AD%98%E5%82%A8/">存储</category></item><item><title>CMU15-445(Fall 2022) 笔记：Hash Tables</title><link>https://berylyvos.icu/posts/15-445-note-hashtables/</link><guid isPermaLink="true">https://berylyvos.icu/posts/15-445-note-hashtables/</guid><pubDate>Mon, 20 Mar 2023 23:07:58 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="哈希表">哈希表&lt;/h1>
 &lt;p>哈希表实现了一个关联数组抽象数据类型，将键映射到值。它提供平均 O(1)，最坏 O(n) 的操作复杂度，以及 O(n) 的空间复杂度。即便平均操作复杂度为O(1)，实际中常需考虑&lt;strong>常数优化&lt;/strong>。&lt;/p>
 &lt;p>哈希表主要有两部分：哈希函数、哈希方案。&lt;/p>
 &lt;h2 id="哈希函数">哈希函数&lt;/h2>
