@@ -1,33 +1,249 @@
-<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Tue, 03 Oct 2023 16:01:17 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>DuckDB中自适应基数树的持久化存储</title><link>https://berylyvos.icu/posts/persistent-storage-of-adaptive-radix-trees-in-duckdb/</link><guid isPermaLink="true">https://berylyvos.icu/posts/persistent-storage-of-adaptive-radix-trees-in-duckdb/</guid><pubDate>Mon, 02 Oct 2023 23:47:32 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;blockquote>
+<?xml version="1.0" encoding="utf-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Shingo四叠半</title><link>https://berylyvos.icu/</link><description>This is Shigo Gnix's no interest blog.</description><generator>Hugo 0.104.3 https://gohugo.io/</generator><language>zh-CN</language><managingEditor>berylyvos@gmail.com (Shingo)</managingEditor><webMaster>berylyvos@gmail.com (Shingo)</webMaster><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><lastBuildDate>Wed, 04 Oct 2023 15:44:12 +0000</lastBuildDate><atom:link rel="self" type="application/rss+xml" href="https://berylyvos.icu/rss.xml"/><item><title>DuckDB中自适应基数树的持久化存储</title><link>https://berylyvos.icu/posts/persistent-storage-of-adaptive-radix-trees-in-duckdb/</link><guid isPermaLink="true">https://berylyvos.icu/posts/persistent-storage-of-adaptive-radix-trees-in-duckdb/</guid><pubDate>Mon, 02 Oct 2023 23:47:32 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;blockquote>
 &lt;p>原文：https://duckdb.org/2022/07/27/art-storage.html&lt;/p>
 &lt;/blockquote>
 &lt;blockquote>
 &lt;p>&lt;strong>tl;dr&lt;/strong>:
 DuckDB使用自适应基数树（ART）索引来强制执行约束条件并加速查询过滤。到目前为止，索引未持久化存储，导致索引信息丢失、重载具有数据约束的表的时间较长等问题。我们现在将ART索引持久化存储到磁盘上，大大缩短了数据库加载时间（高达数量级），并且不再丢失现有索引的跟踪。本博文深入探讨了ART存储的实现、基准测试和未来工作。&lt;/p>
 &lt;/blockquote>
-&lt;p>DuckDB使用&lt;a href="https://db.in.tum.de/~leis/papers/ART.pdf">ART索引&lt;/a>来维护主键（PK）、外键（FK）和唯一约束。它们还加速了点查询、范围查询（具有高选择性）和连接操作。在最新版本之前（或V0.4.1），DuckDB没有将ART索引持久化存储到磁盘上。在存储数据库文件时，只会存储有关现有PK和FK的信息，所有其他索引都是临时的，重启数据库时丢失。对于PK和FK，它们在重载数据库时会被完全重建，从而导致加载时间较长的不便。&lt;/p>
-&lt;p>关于ART索引已经发表了大量研究工作，尤其是关于&lt;a href="https://db.in.tum.de/~leis/papers/artsync.pdf">同步&lt;/a>、&lt;a href="https://dbis.uibk.ac.at/sites/default/files/2018-06/hot-height-optimized.pdf">缓存效率&lt;/a>和&lt;a href="https://bigdata.uni-saarland.de/publications/ARCD15.pdf">评估&lt;/a>方面。然而，迄今为止，还没有公开的关于序列化和缓冲区管理ART树的信息。&lt;/p>
-&lt;p>本博文将描述DuckDB如何存储和加载ART索引。特别是解释索引是如何懒加载的（只有在必要时才将ART节点加载到内存中）。在ART索引部分，我们将介绍什么是ART索引，它是如何工作的，并提供一些示例。在DuckDB中的ART部分，我们将解释为什么决定在DuckDB中使用ART索引，以及在哪些地方使用它，讨论不持久化ART索引的问题。在ART存储部分，我们将解释如何在DuckDB中对ART索引进行序列化和缓冲区管理。在基准测试部分，我们将比较DuckDB v0.4.0（ART存储之前的版本）与DuckDB的最新版本。我们将展示在这两个版本中PK和FK的加载成本之间的差异，以及懒加载ART索引和访问完全加载的ART索引之间的差异。最后，在指南部分，我们将讨论当前实现的缺点以及未来ART索引改进计划。&lt;/p>
+&lt;p>DuckDB使用&lt;a href="https://db.in.tum.de/~leis/papers/ART.pdf">ART索引&lt;/a>来维护主键（PK）、外键（FK）和唯一约束。
+它们还加速了点查询、范围查询（具有高选择性）和连接操作。在最新版本之前（或V0.4.1），DuckDB没有将ART索引持久化存储到磁盘上。
+在存储数据库文件时，只会存储有关现有PK和FK的信息，所有其他索引都是临时的，重启数据库时丢失。
+对于PK和FK，它们在重载数据库时会被完全重建，从而导致加载时间较长的不便。&lt;/p>
+&lt;p>关于ART索引已经发表了大量研究工作，尤其是关于&lt;a href="https://db.in.tum.de/~leis/papers/artsync.pdf">同步&lt;/a>、
+&lt;a href="https://dbis.uibk.ac.at/sites/default/files/2018-06/hot-height-optimized.pdf">缓存效率&lt;/a>和
+&lt;a href="https://bigdata.uni-saarland.de/publications/ARCD15.pdf">评估&lt;/a>方面。
+然而，迄今为止，还没有公开的关于序列化和缓冲区管理ART树的信息。&lt;/p>
+&lt;p>本博文将描述DuckDB如何存储和加载ART索引。特别是解释索引是如何懒加载的（只有在必要时才将ART节点加载到内存中）。
+在&lt;strong>ART索引&lt;/strong>部分，我们将介绍什么是ART索引，它是如何工作的，并提供一些示例。
+在&lt;strong>DuckDB中的ART&lt;/strong>部分，我们将解释为什么决定在DuckDB中使用ART索引，以及在哪些地方使用它，讨论不持久化ART索引存在的问题。
+在&lt;strong>ART存储&lt;/strong>部分，我们将解释如何在DuckDB中对ART索引进行序列化和缓冲区管理。
+在&lt;strong>基准测试&lt;/strong>部分，我们将比较DuckDB v0.4.0（ART存储之前的版本）与DuckDB的最新版本。我们将展示在这两个版本中PK和FK的加载成本之间的差异，以及懒加载ART索引和访问完全加载的ART索引之间的差异。
+最后，我们将讨论当前实现的缺点以及未来ART索引改进计划。&lt;/p>
 &lt;h2 id="art索引">ART索引&lt;/h2>
 &lt;p>自适应基数树本质上是一种垂直和水平压缩的紧凑型Trie。&lt;/p>
 &lt;h3 id="trie">Trie&lt;/h3>
-&lt;p>Trie是一种树状数据结构，其中每个树级别包含关于数据集的一部分信息。它们通常以字符串为例进行说明。在下图中，你可以看到一个包含字符串&lt;code>pedro&lt;/code>、&lt;code>paulo&lt;/code>和&lt;code>peri&lt;/code>的Trie。&lt;/p>
-&lt;p>&lt;img src="https://duckdb.org/images/blog/ART/string-trie.png" alt="string_trie">&lt;/p>
-&lt;p>Trie的主要优势在于其具有O(k)的查找时间复杂度，这意味着在最坏情况下，查找操作的成本将等于字符串的长度k。&lt;/p>
-&lt;p>实际上，Trie也可以用于存储数值数据类型。但是，如果像字符串一样逐个字符地存储它们，将会浪费空间。例如，考虑类型&lt;code>uint64_t&lt;/code>，占据了64位（8字节）的空间。&lt;code>uint64_t&lt;/code>的最大值是18,446,744,073,709,551,615。因此，如果我们像上面的示例一样表示它，我们需要17个Trie层级。在实际中，Trie根据&lt;strong>位扇出&lt;/strong>（bit fan-out）创建，扇出指定了每个Trie层级表示多少位。一个带有8位扇出的&lt;code>uint64_t&lt;/code> Trie最多有8层，每层表示一个字节。&lt;/p>
-&lt;p>在下面的示例中，我们有一个Trie，用于索引值7、10和12。每个节点由0和1两个位组成，和一个指针（*表示非空，Ø表示空）。与之前的字符串Trie类似，Trie的每个层级都表示两个位，指针指向子节点。最后，叶子节点指向实际的数据。&lt;/p>
-&lt;p>&lt;img src="https://duckdb.org/images/blog/ART/2-bit-trie.png" alt="2-bit-trie">&lt;/p>
-&lt;p>很快可以注意到，这种Trie表示在两个方面都是浪费的。首先，许多节点只有一个子节点（即一个路径），这可以通过&lt;strong>垂直压缩&lt;/strong>（基数树）来合并。其次，许多节点具有空指针，占用了空间但没有包含任何信息，这可以通过&lt;strong>水平压缩&lt;/strong>来解决。&lt;/p>
+&lt;p>Trie是一种树状数据结构，其中每个树层级包含关于数据集的一部分信息。它们通常以字符串为例进行说明。
+Trie的主要优势在于其具有O(k)的查找时间复杂度，这意味着在最坏情况下，查找操作的成本将等于字符串的长度k。&lt;/p>
+&lt;p>实际上，Trie也可以用于存储数值数据类型。但是，如果像字符串一样逐个字符地存储它们，将会浪费空间。
+例如，考虑类型&lt;code>uint64_t&lt;/code>，占据了64位（8字节）的空间。&lt;code>uint64_t&lt;/code>的最大值是18,446,744,073,709,551,615。
+因此，如果我们像上面的示例一样表示它，我们需要17个Trie层级。
+在实际中，Trie根据&lt;strong>位扇出&lt;/strong>（bit fan-out）创建，扇出指定了每个Trie层级表示多少位。
+一个带有8位扇出的&lt;code>uint64_t&lt;/code> Trie最多有8层，每层表示一个字节。&lt;/p>
+&lt;p>在下面的示例中，我们有一个Trie，用于索引7、10和12。每个节点由0和1两个位组成，和一个指针（*表示非空，Ø表示空）。
+与之前的字符串Trie类似，Trie的每个层级都表示两个位，指针指向子节点。最后，叶子节点指向实际的数据。&lt;/p>
+&lt;p>&lt;img src="https://s2.loli.net/2023/10/04/Lb2uiXCmaFJSoG6.png" alt="2-bit-trie.png">&lt;/p>
+&lt;p>很快可以注意到，这种Trie表示在两个方面都是浪费的。首先，许多节点只有一个子节点（即一个路径），
+这可以通过&lt;strong>垂直压缩&lt;/strong>（基数树）来合并。其次，许多节点具有空指针，占用了空间但没有包含任何信息，
+这可以通过&lt;strong>水平压缩&lt;/strong>来解决。&lt;/p>
 &lt;h3 id="垂直压缩rt">垂直压缩（RT）&lt;/h3>
-&lt;p>垂直压缩的基本思想是合并具有只有一个子节点的路径。为了支持这一点，节点存储一个前缀，包含压缩到该节点的路径。下图可以看到前两个节点只有一个子节点。这些节点可以折叠到第三个节点（即第一个分叉的节点）作为前缀路径。在查找时，关键字必须匹配前缀路径中包含的所有值。&lt;/p>
-&lt;p>&lt;img src="https://duckdb.org/images/blog/ART/2-bit-collapse-trie.png" alt="2-bit-collapse-trie">&lt;/p>
-&lt;p>下图中，可以看到经过垂直压缩后的Trie。这种Trie变体通常被称为&lt;strong>基数树&lt;/strong>（Radix Tree）。虽然通过这种Trie变体已经节省了很多浪费的空间，但仍然有许多具有空指针的节点。&lt;/p>
-&lt;p>&lt;img src="https://duckdb.org/images/blog/ART/2-bit-collapse-trie-result.png" alt="2-bit-collapse-trie-result">&lt;/p>
+&lt;p>垂直压缩的基本思想是合并具有只有一个子节点的路径。
+为了支持这一点，节点存储一个前缀，包含压缩到该节点的路径。
+下图可以看到前两个节点只有一个子节点。这些节点可以折叠到第三个节点（即第一个分叉的节点）作为&lt;strong>前缀路径&lt;/strong>。
+在查找时，关键字必须匹配前缀路径中包含的所有值。&lt;/p>
+&lt;p>&lt;img src="https://s2.loli.net/2023/10/04/aOQbpJVKBR8fni2.png" alt="2-bit-collapse-trie.png">&lt;/p>
+&lt;p>下图中，可以看到经过垂直压缩后的Trie。这种Trie变体通常被称为&lt;strong>基数树&lt;/strong>（Radix Tree）。
+虽然通过这种Trie变体已经节省了很多浪费的空间，但仍然有许多具有空指针的节点。&lt;/p>
+&lt;p>&lt;img src="https://s2.loli.net/2023/10/04/Zq7NwfJi93zPeCU.png" alt="2-bit-collapse-trie-result.png">&lt;/p>
 &lt;h3 id="水平压缩art">水平压缩（ART）&lt;/h3>
 &lt;p>为了充分理解ART索引背后的设计决策，我们首先需要将2位扇出扩展到8位，这是DBMS中常见的扇出值。&lt;/p>
-&lt;p>&lt;img src="https://duckdb.org/images/blog/ART/8-bit-radix-tree.png" alt="8-bit-radix-tree">&lt;/p>
+&lt;p>&lt;img src="https://s2.loli.net/2023/10/04/LYPHSiXhWpftM4c.png" alt="8-bit-radix-tree.png">&lt;/p>
+&lt;p>上图是在一个具有8位扇出的Trie节点。
+实际上，这些节点将存储（2^8）256个指针，其中键是指针在数组中的位置。
+在这个示例所描述的情况下，一个节点的大小为（256个指针 * 8字节）2048字节，但实际上只利用了24字节（3个指针 * 8字节）。
+为了避免这种情况，ART根据当前节点的填充程度使用4种不同的节点类型。&lt;/p>
+&lt;p>在图形表示中，我呈现了节点的概念性可视化以及键为0、4和255的示例。 以下是每种节点类型的描述：&lt;/p>
+&lt;p>Node-4：最多可以容纳4个不同的键。键存储在一个1-字节数组中，每个键对应一个指针。
+其总大小为36字节（4个键 * 1字节 + 4个指针 * 8字节） 。 指针数组与键数组对齐。&lt;/p>
+&lt;p>&lt;img src="https://s2.loli.net/2023/10/04/ZgMd9VEj67zynPD.png" alt="art-4.png">&lt;/p>
+&lt;p>Node-16：最多可容纳16个不同的键。与Node-4类似，每个键存储在一个1-字节数组中，每个键对应一个指针。
+其总大小为144字节（16个键 * 1字节 + 16个指针 * 8字节）。与Node-4一样，指针数组与键数组对齐。&lt;/p>
+&lt;p>&lt;img src="https://s2.loli.net/2023/10/04/hGKOPUJgHxjDEvW.png" alt="art-16.png">&lt;/p>
+&lt;p>Node-48：最多可以容纳48个不同的键。
+当一个键存在于这个节点中时，表示该键的1-字节数组位置将保存一个指向该键子节点的指针数组中的索引。
+其总大小为640字节（256个键 * 1字节 + 48个指针 * 8字节）。
+请注意，指针数组和键数组不再对齐。键数组存储指针数组的索引。&lt;/p>
+&lt;p>&lt;img src="https://s2.loli.net/2023/10/04/hPknsotyM8FLEQR.png" alt="art-48.png">&lt;/p>
+&lt;p>Node-256：最多可以容纳256个不同的键。
+它只有一个指针数组，如果指针被设置，则表示该键存在，并且它指向其子节点。
+其总大小为2048字节（256个指针 * 8字节）。&lt;/p>
+&lt;p>&lt;img src="https://s2.loli.net/2023/10/04/vcCMHXy8zVYQ7GU.png" alt="art-256.png">&lt;/p>
+&lt;p>对于上一节中的示例，我们可以使用Node-4而不是Node-256来存储键，因为我们只有3个键。&lt;/p>
+&lt;p>&lt;img src="https://s2.loli.net/2023/10/04/cmPVCo4JthKTqGj.png" alt="art-index-example.png">&lt;/p>
 &lt;h2 id="duckdb中的art">DuckDB中的ART&lt;/h2>
-&lt;h2 id="art存储">ART存储&lt;/h2>
+&lt;p>在考虑在DuckDB中实现哪种索引结构时，我们希望找到一种既可以用于&lt;strong>保持PK/FK/唯一约束&lt;/strong>，
+又可以&lt;strong>加速范围查询和连接&lt;/strong>的结构。DBMS通常实现&lt;strong>哈希表&lt;/strong>用于约束检查，以及&lt;strong>B+树&lt;/strong>用于范围查询。
+然而，在ART索引中，我们看到了一种机会，可以通过使用一种数据结构来减少代码复杂性，同时满足两种用例的需求。
+ART索引提供的主要特性，我们正在利用的包括：&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>紧凑的结构&lt;/strong>：由于ART的内部节点相对较小，它们可以放入CPU缓存，因此比B+树更注重缓存。&lt;/li>
+&lt;li>&lt;strong>快速的点查询&lt;/strong>：ART点查询的最坏情况时间复杂度是O(k)，对于约束检查来说足够快。&lt;/li>
+&lt;li>&lt;strong>插入不会引起显著的性能降低&lt;/strong>：许多哈希表变种在达到一定大小时必须重建。
+在实际情况下，一个插入操作可能导致性能显著下降，查询突然花费更多的时间来完成，对于用户来说看不出明显的原因。
+在ART中，插入操作可能会导致节点的增长（例如，Node-4可能会增长到Node-16），但这些操作是廉价的。&lt;/li>
+&lt;li>&lt;strong>能够处理范围查询&lt;/strong>：虽然ART不像B+树那样快速执行范围查询，因为它必须执行树遍历，而B+树可以顺序扫描叶节点，
+但它仍然比哈希表具有优势，因为这些类型的查询可以执行（有人可能会争辩说可以使用哈希表进行范围查询，但不如ART高效）。
+这使我们可以高效地使用ART进行高选择性的范围查询和索引连接。&lt;/li>
+&lt;li>&lt;strong>可维护性&lt;/strong>：使用一种结构同时进行约束检查和范围查询，而不是两种结构，更具代码效率和可维护性。&lt;/li>
+&lt;/ol>
+&lt;h3 id="用来干什么">用来干什么&lt;/h3>
+&lt;p>如前所述，ART索引在DuckDB中主要用于三个方面。&lt;/p>
+&lt;p>&lt;strong>数据约束&lt;/strong>。主键、外键和唯一约束都由ART索引维护。
+当在带有约束的元组中插入数据时，将有效地尝试在ART索引中执行插入，如果元组已经存在则会失败。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sql" data-lang="sql">&lt;span class="line">&lt;span class="cl">&lt;span class="k">CREATE&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">TABLE&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">integers&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nb">INTEGER&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">PRIMARY&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">KEY&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="c1">-- Insert unique values into ART
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">INSERT&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">INTO&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">integers&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">VALUES&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">3&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="c1">-- Insert conflicting value in ART will fail
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">INSERT&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">INTO&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">integers&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">VALUES&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">3&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="k">CREATE&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">TABLE&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">fk_integers&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">j&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nb">INTEGER&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">FOREIGN&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">KEY&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">j&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">REFERENCES&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">integers&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">))&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="c1">-- This insert works normally
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">INSERT&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">INTO&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">fk_integers&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">VALUES&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">3&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="c1">-- This fails after checking the ART in integers
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">INSERT&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">INTO&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">fk_integers&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">VALUES&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">4&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>范围查询&lt;/strong>。对索引列的&lt;strong>高选择性&lt;/strong>（应该是指范围较小）范围查询也将使用ART索引。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sql" data-lang="sql">&lt;span class="line">&lt;span class="cl">&lt;span class="k">CREATE&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">TABLE&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">integers&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nb">INTEGER&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">PRIMARY&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">KEY&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="c1">-- Insert unique values into ART
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">INSERT&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">INTO&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">integers&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">VALUES&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">3&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">8&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">10&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="c1">-- Range queries (if highly selective) will also use the ART index
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">SELECT&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">FROM&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">integers&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">where&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="o">&amp;gt;=&lt;/span>&lt;span class="mi">8&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>连接&lt;/strong>。具有&lt;strong>少量匹配项的Join&lt;/strong>也将利用现有的ART索引。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sql" data-lang="sql">&lt;span class="line">&lt;span class="cl">&lt;span class="c1">-- Optionally you can always force index joins with the following pragma
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">PRAGMA&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">force_index_join&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="k">CREATE&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">TABLE&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">t1&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nb">INTEGER&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">PRIMARY&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">KEY&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="k">CREATE&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">TABLE&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">t2&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nb">INTEGER&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">PRIMARY&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">KEY&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="c1">-- Insert unique values into ART
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">INSERT&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">INTO&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">t1&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">VALUES&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">3&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">8&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">10&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="k">INSERT&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">INTO&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">t2&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">VALUES&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">3&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">8&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">10&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="c1">-- Joins will also use the ART index
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">SELECT&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">FROM&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">t1&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">INNER&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">JOIN&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">t2&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">on&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">t1&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">t2&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>表达式索引&lt;/strong>。ART索引也可用于快速查找表达式。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;span class="lnt">9
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sql" data-lang="sql">&lt;span class="line">&lt;span class="cl">&lt;span class="k">CREATE&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">TABLE&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">integers&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nb">INTEGER&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">j&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nb">INTEGER&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="k">INSERT&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">INTO&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">integers&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">VALUES&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">3&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mi">3&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="c1">-- Creates index over i+j expression
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">CREATE&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">INDEX&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">i_index&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">ON&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">integers&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">USING&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">ART&lt;/span>&lt;span class="p">((&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="o">+&lt;/span>&lt;span class="n">j&lt;/span>&lt;span class="p">))&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="c1">-- Uses ART index point query
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">SELECT&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">FROM&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">integers&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">where&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="o">+&lt;/span>&lt;span class="n">j&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="art存储">ART存储&lt;/h2>
+&lt;p>存储ART索引时存在两个主要约束：&lt;/p>
+&lt;p>1）必须以允许懒加载的方式存储索引。否则，我们将不得不完全加载索引，
+包括可能对在该会话中执行的查询不必要的节点； 2）不能增加节点大小。否则，我们将减少ART索引的缓存感知效率。&lt;/p>
+&lt;h3 id="后序遍历">后序遍历&lt;/h3>
+&lt;p>为了允许懒加载，我们必须存储节点的所有子节点，收集每个子节点的存储位置信息，
+然后，在存储实际节点时，我们存储每个子节点的磁盘信息。要执行这种类型的操作，需要进行后序遍历。&lt;/p>
+&lt;p>后序遍历如下图所示。红色的圆圈表示存储节点的数字顺序。&lt;/p>
+&lt;p>&lt;img src="https://s2.loli.net/2023/10/04/p8via2eTkAxFWJ1.png" alt="serialization-order.png">&lt;/p>
+&lt;p>下图显示了DuckDB块格式下的实际表示。在DuckDB中，数据存储在256KB的连续块中。每个块由一个id表示。&lt;/p>
+&lt;p>&lt;img src="https://s2.loli.net/2023/10/04/8eifxaCWVJkZ3EG.png" alt="block-storage.png">&lt;/p>
+&lt;p>在本例中，Block0 存储了一些元数据。在偏移量100,000和100,200之间，存储了ART索引的元数据(例如，名称，约束，表达式)及其根节点的&amp;lt;Block,Offset&amp;gt;。&lt;/p>
+&lt;p>例如，假设我们正在查找在存储序号为1的Leaf[1]中的键。我们将首先在&amp;lt;Block:2, Offset:220&amp;gt;加载ART根节点，
+通过检查存储在该节点中的键，我们将看到我们必须在&amp;lt;Block:2, Offset:140&amp;gt;加载Node-16，
+然后最后在&amp;lt;Block:2, Offset:0&amp;gt;加载Leaf[1]。这意味着对于这个查找，只有这3个节点被加载到内存中。
+后续对这些节点的访问只需要内存访问，而对其他节点的访问(例如，Leaf[2])仍需磁盘访问。&lt;/p>
+&lt;p>实现这个(反)序列化过程的一个主要问题是，现在我们不仅需要保存指针的内存地址信息，
+还需要知道它们是否已经在内存中，以及如果没有的话，它们存储在哪个&amp;lt;Block,Offset&amp;gt;。&lt;/p>
+&lt;p>如果我们将Block Id和Offset存储在新的变量中，
+将会大幅增加ART节点的大小，降低其作为缓存感知数据结构的有效性。&lt;/p>
+&lt;p>以Node-256为例。保存256个指针的成本为2048字节（256个指针 * 8字节）。
+假设我们决定将块信息存储在一个新数组中，如下所示：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-C++" data-lang="C++">&lt;span class="line">&lt;span class="cl">&lt;span class="k">struct&lt;/span> &lt;span class="nc">BlockPointer&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">uint32_t&lt;/span> &lt;span class="n">block_id&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kt">uint32_t&lt;/span> &lt;span class="n">offset&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Node256&lt;/span> &lt;span class="o">:&lt;/span> &lt;span class="k">public&lt;/span> &lt;span class="n">Node&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// Pointers to the child nodes
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="n">Node&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="n">children&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">256&lt;/span>&lt;span class="p">];&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">BlockPointer&lt;/span> &lt;span class="n">block_info&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">256&lt;/span>&lt;span class="p">];&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Node-256将增加2048字节(256 * (4+4))，使其当前大小增加一倍，达到4096字节。&lt;/p>
+&lt;h3 id="pointer-swizzling">Pointer Swizzling&lt;/h3>
+&lt;p>为了避免增加ART节点的大小，我们决定实现&lt;a href="https://en.wikipedia.org/wiki/Pointer_swizzling">Swizzlable Pointers&lt;/a>并使用它们来替代常规指针。&lt;/p>
+&lt;p>这个想法是，我们不需要全部64位的指针来指向一个内存地址。（48位可以提供256TB的地址空间，支持任何当前的架构，更多信息请参见&lt;a href="https://stackoverflow.com/questions/6716946/why-do-x86-64-systems-have-only-a-48-bit-virtual-address-space">这里&lt;/a>
+和&lt;a href="https://en.wikipedia.org/wiki/64-bit_computing">这里&lt;/a>）
+因此，我们可以使用最高有效位作为标志（即Swizzle标志）。
+如果Swizzle标志被设置，那么Swizzlable Pointer中的值是节点的内存地址。
+否则，该变量存储了节点存储位置的块信息。我们使用接下来的31位来存储Block ID，剩下的32位来存储Offset。&lt;/p>
+&lt;p>在下图中，您可以看到DuckDB的Swizzlable Pointer的可视化表示。&lt;/p>
+&lt;p>&lt;img src="https://s2.loli.net/2023/10/04/jt5k8xrV3BTYpK2.png" alt="pointer-swizzling.png">&lt;/p>
 &lt;h2 id="基准测试">基准测试&lt;/h2>
 &lt;h2 id="后续工作">后续工作&lt;/h2></description><category domain="https://berylyvos.icu/categories/db/">db</category><category domain="https://berylyvos.icu/tags/art/">ART</category><category domain="https://berylyvos.icu/tags/%E7%B4%A2%E5%BC%95/">索引</category><category domain="https://berylyvos.icu/tags/duckdb/">DuckDB</category><category domain="https://berylyvos.icu/tags/%E5%AD%98%E5%82%A8/">存储</category></item><item><title>CMU15-445(Fall 2022) 笔记：Hash Tables</title><link>https://berylyvos.icu/posts/15-445-note-hashtables/</link><guid isPermaLink="true">https://berylyvos.icu/posts/15-445-note-hashtables/</guid><pubDate>Mon, 20 Mar 2023 23:07:58 +0800</pubDate><author>berylyvos@gmail.com (Shingo)</author><copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright><description>&lt;h1 id="哈希表">哈希表&lt;/h1>
 &lt;p>哈希表实现了一个关联数组抽象数据类型，将键映射到值。它提供平均 O(1)，最坏 O(n) 的操作复杂度，以及 O(n) 的空间复杂度。即便平均操作复杂度为O(1)，实际中常需考虑&lt;strong>常数优化&lt;/strong>。&lt;/p>
