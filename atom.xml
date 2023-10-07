@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN"><title type="text">Shingo四叠半</title><subtitle type="html">This is Shigo Gnix's no interest blog.</subtitle><updated>2023-10-04T15:44:12+00:00</updated><id>https://berylyvos.icu/</id><link rel="alternate" type="text/html" href="https://berylyvos.icu/"/><link rel="self" type="application/atom+xml" href="https://berylyvos.icu/atom.xml"/><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><generator uri="https://gohugo.io/" version="0.104.3">Hugo</generator><entry><title type="text">DuckDB中自适应基数树的持久化存储</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/persistent-storage-of-adaptive-radix-trees-in-duckdb/"/><id>https://berylyvos.icu/posts/persistent-storage-of-adaptive-radix-trees-in-duckdb/</id><updated>2023-10-04T15:44:10+00:00</updated><published>2023-10-02T23:47:32+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">原文：https://duckdb.org/2022/07/27/art-stora……</summary><content type="html">&lt;blockquote>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN"><title type="text">Shingo四叠半</title><subtitle type="html">This is Shigo Gnix's no interest blog.</subtitle><updated>2023-10-07T11:47:31+00:00</updated><id>https://berylyvos.icu/</id><link rel="alternate" type="text/html" href="https://berylyvos.icu/"/><link rel="self" type="application/atom+xml" href="https://berylyvos.icu/atom.xml"/><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><generator uri="https://gohugo.io/" version="0.104.3">Hugo</generator><entry><title type="text">DuckDB中自适应基数树的持久化存储</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/persistent-storage-of-adaptive-radix-trees-in-duckdb/"/><id>https://berylyvos.icu/posts/persistent-storage-of-adaptive-radix-trees-in-duckdb/</id><updated>2023-10-07T11:47:27+00:00</updated><published>2023-10-02T23:47:32+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">原文：https://duckdb.org/2022/07/27/art-stora……</summary><content type="html">&lt;blockquote>
 &lt;p>原文：https://duckdb.org/2022/07/27/art-storage.html&lt;/p>
 &lt;/blockquote>
 &lt;blockquote>
@@ -245,7 +245,89 @@ ART索引提供的主要特性，我们正在利用的包括：&lt;/p>
 &lt;p>在下图中，您可以看到DuckDB的Swizzlable Pointer的可视化表示。&lt;/p>
 &lt;p>&lt;img src="https://s2.loli.net/2023/10/04/jt5k8xrV3BTYpK2.png" alt="pointer-swizzling.png">&lt;/p>
 &lt;h2 id="基准测试">基准测试&lt;/h2>
-&lt;h2 id="后续工作">后续工作&lt;/h2></content><category scheme="https://berylyvos.icu/categories/db/" term="db" label="db"/><category scheme="https://berylyvos.icu/tags/art/" term="ART" label="ART"/><category scheme="https://berylyvos.icu/tags/%E7%B4%A2%E5%BC%95/" term="索引" label="索引"/><category scheme="https://berylyvos.icu/tags/duckdb/" term="DuckDB" label="DuckDB"/><category scheme="https://berylyvos.icu/tags/%E5%AD%98%E5%82%A8/" term="存储" label="存储"/></entry><entry><title type="text">CMU15-445(Fall 2022) 笔记：Hash Tables</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/15-445-note-hashtables/"/><id>https://berylyvos.icu/posts/15-445-note-hashtables/</id><updated>2023-10-04T15:44:10+00:00</updated><published>2023-03-20T23:07:58+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">哈希表 哈希表实现了一个关联数组抽象数据类型，将键映射到值。它提供平均 O(1)，最坏 O(n)……</summary><content type="html">&lt;h1 id="哈希表">哈希表&lt;/h1>
+&lt;p>为了评估当前存储实现的优点和缺点，我们运行了一个基准测试(可在此&lt;a href="https://colab.research.google.com/drive/1lidiFNswQfxdmYlsufXUT80IFpyluEF3?usp=sharing">Colab&lt;/a>获得)，
+其中我们创建了一个包含50,000,000个整型元素的表，这些元素之上有一个主键约束。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="n">con&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">duckdb&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">connect&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;vault.db&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">con&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">execute&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;CREATE TABLE integers (x integer primary key)&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">con&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">execute&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;INSERT INTO integers SELECT * FROM range(50000000);&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>我们在两个不同版本的DuckDB上运行这个基准测试，其中一个版本不存储索引(v0.4.0)，即索引始终在内存中，
+并在数据库重新启动时重新构建；另一个版本存储索引，使用前面描述的懒加载技术。&lt;/p>
+&lt;h3 id="存储时间">存储时间&lt;/h3>
+&lt;p>首先测量序列化索引的额外成本。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Name&lt;/th>
+&lt;th>Time(s)&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>重建&lt;/td>
+&lt;td>8.99&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>存索引&lt;/td>
+&lt;td>18.97&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>我们可以看到，存储索引的成本是不存储索引的2倍。原因是我们的表只有一列包含50,000,000个&lt;code>int32_t&lt;/code>值。
+但是，在存储ART时，我们还为叶子中各自的&lt;code>row_id&lt;/code>存储了50,000,000个&lt;code>int64_t&lt;/code>值。这是额外存储成本的主要原因。&lt;/p>
+&lt;h3 id="加载时间">加载时间&lt;/h3>
+&lt;p>然后测量重新启动数据库所需的加载时间。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>Name&lt;/th>
+&lt;th>Time(s)&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>重建&lt;/td>
+&lt;td>7.75&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>存索引&lt;/td>
+&lt;td>0.06&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>在这里，我们可以看到加载数据库的时间有两个数量级的差异。这种差异基本上是由于加载过程中ART索引的完全重建。
+相反，在存索引版本中，此时只加载有关ART索引的元数据信息。&lt;/p>
+&lt;h3 id="查询时间冷">查询时间（冷）&lt;/h3>
+&lt;p>我们现在测量在索引上运行点查询的冷查询时间(即，数据库刚刚重新启动，这意味着在存储版本中，索引还不存在于内存中)。
+在均匀分布的10000个元素上，我们运行5000次点查询。我们使用这个值总是强制点查询加载大量未使用的节点。&lt;/p>
+&lt;p>&lt;img src="https://s2.loli.net/2023/10/07/IeL8Wx5MQ3EcATo.png" alt="cold-run.png">&lt;/p>
+&lt;p>一般来说，在持久化存储版本中，每个查询的开销要高出3倍。这主要有两个原因:&lt;/p>
+&lt;ol>
+&lt;li>创建节点。在存储版本中，我们确实懒创建节点，这意味着必须为每个节点分配所有参数，并加载键和前缀等值。&lt;/li>
+&lt;li>Block Pinning。对每个节点，我们必须pin/unpin存储它们的块。&lt;/li>
+&lt;/ol>
+&lt;h3 id="查询时间热">查询时间（热）&lt;/h3>
+&lt;p>&lt;img src="https://s2.loli.net/2023/10/07/q2HCjSewxXBlyMb.png" alt="hot-run.png">&lt;/p>
+&lt;p>两个版本中的时间是可比较的，因为存储版本中的所有节点都已经在内存中。
+总之，当存储索引处于活跃使用状态时，它们的性能与完全在内存中的索引相似。&lt;/p>
+&lt;h2 id="后续工作">后续工作&lt;/h2>
+&lt;p>ART索引存储是DuckDB中一个长期存在的问题，许多用户声称这是一个缺失的功能，这对他们使用DuckDB造成了障碍。
+虽然现在实现了存储和懒加载ART索引，但是仍然有许多改进方案来提高ART索引的性能。&lt;/p>
+&lt;ol>
+&lt;li>缓存Pinned Blocks。在我们当前的实现中，尽管块可以存储多个节点，并且很可能通过查找连续重用，但块会不断地pin/unpin。巧妙地缓存它们将大大节省触发节点加载的查询的时间。&lt;/li>
+&lt;li>批量加载。我们的ART索引目前不支持批量加载。这意味着当在列上创建索引时，节点将不断调整大小，因为元素将一个接一个地插入。如果我们批量加载数据，我们可以确切地知道我们必须为该数据集创建哪些节点，从而避免频繁地调整大小。&lt;/li>
+&lt;li>批量插入。在执行批量插入时，会发生与批量加载类似的问题。一个可能的解决方案是创建一个带有批量加载的新ART索引，然后将其与现有的ART索引合并。&lt;/li>
+&lt;li>Vectorized查找/插入。DuckDB使用了一个vectorized的执行引擎。然而，我们的ART查找和插入仍然遵循tuple-at-a-time模型。&lt;/li>
+&lt;li>可更新的索引存储。在我们当前的实现中，ART索引正磁盘中完全失效后重新存储。这将导致在后续存储中不必要地增加存储时间。直接将节点更新到磁盘而不是完全重写索引可以大大降低未来的存储成本。换句话说，索引始终在每个checkpoint完全存储。&lt;/li>
+&lt;/ol></content><category scheme="https://berylyvos.icu/categories/db/" term="db" label="db"/><category scheme="https://berylyvos.icu/tags/art/" term="ART" label="ART"/><category scheme="https://berylyvos.icu/tags/%E7%B4%A2%E5%BC%95/" term="索引" label="索引"/><category scheme="https://berylyvos.icu/tags/duckdb/" term="DuckDB" label="DuckDB"/><category scheme="https://berylyvos.icu/tags/%E5%AD%98%E5%82%A8/" term="存储" label="存储"/></entry><entry><title type="text">CMU15-445(Fall 2022) 笔记：Hash Tables</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/15-445-note-hashtables/"/><id>https://berylyvos.icu/posts/15-445-note-hashtables/</id><updated>2023-10-07T11:47:27+00:00</updated><published>2023-03-20T23:07:58+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">哈希表 哈希表实现了一个关联数组抽象数据类型，将键映射到值。它提供平均 O(1)，最坏 O(n)……</summary><content type="html">&lt;h1 id="哈希表">哈希表&lt;/h1>
 &lt;p>哈希表实现了一个关联数组抽象数据类型，将键映射到值。它提供平均 O(1)，最坏 O(n) 的操作复杂度，以及 O(n) 的空间复杂度。即便平均操作复杂度为O(1)，实际中常需考虑&lt;strong>常数优化&lt;/strong>。&lt;/p>
 &lt;p>哈希表主要有两部分：哈希函数、哈希方案。&lt;/p>
 &lt;h2 id="哈希函数">哈希函数&lt;/h2>
@@ -288,7 +370,7 @@ ART索引提供的主要特性，我们正在利用的包括：&lt;/p>
 &lt;ul>
 &lt;li>当任何一个桶满时，该桶指向存放新元素的溢出桶；后将分裂指针指向的槽进行分裂，新槽被添加至目录的末尾，并创建一个新的哈希函数。&lt;/li>
 &lt;li>当分裂指针到达最后一个未分裂槽时，将原始哈希函数替换为新哈希函数。&lt;/li>
-&lt;/ul></content><category scheme="https://berylyvos.icu/categories/cmu15-445/" term="CMU15-445" label="CMU15-445"/><category scheme="https://berylyvos.icu/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" term="数据库" label="数据库"/><category scheme="https://berylyvos.icu/tags/%E7%AC%94%E8%AE%B0/" term="笔记" label="笔记"/><category scheme="https://berylyvos.icu/tags/hashing-scheme/" term="Hashing Scheme" label="Hashing Scheme"/></entry><entry><title type="text">CMU15-445(Fall 2022) 笔记：Pilot</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/15-445-note-1/"/><id>https://berylyvos.icu/posts/15-445-note-1/</id><updated>2023-10-04T15:44:10+00:00</updated><published>2023-03-05T22:53:43+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">Pilot DBMS A database is an organized collection of inter-related data that models some aspect of the real-world. A DBMS is a software that allows applications to store and analyze information in a database. 不要混淆“数据库……</summary><content type="html">&lt;h1 id="pilot">Pilot&lt;/h1>
+&lt;/ul></content><category scheme="https://berylyvos.icu/categories/cmu15-445/" term="CMU15-445" label="CMU15-445"/><category scheme="https://berylyvos.icu/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" term="数据库" label="数据库"/><category scheme="https://berylyvos.icu/tags/%E7%AC%94%E8%AE%B0/" term="笔记" label="笔记"/><category scheme="https://berylyvos.icu/tags/hashing-scheme/" term="Hashing Scheme" label="Hashing Scheme"/></entry><entry><title type="text">CMU15-445(Fall 2022) 笔记：Pilot</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/15-445-note-1/"/><id>https://berylyvos.icu/posts/15-445-note-1/</id><updated>2023-10-07T11:47:27+00:00</updated><published>2023-03-05T22:53:43+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">Pilot DBMS A database is an organized collection of inter-related data that models some aspect of the real-world. A DBMS is a software that allows applications to store and analyze information in a database. 不要混淆“数据库……</summary><content type="html">&lt;h1 id="pilot">Pilot&lt;/h1>
 &lt;h2 id="dbms">DBMS&lt;/h2>
 &lt;blockquote>
 &lt;p>A &lt;strong>database&lt;/strong> is an organized collection of inter-related &lt;strong>data&lt;/strong> that models some aspect of the real-world.&lt;/p>
@@ -463,7 +545,7 @@ tuple 的元数据包含：&lt;/p>
 &lt;/ul>
 &lt;/li>
 &lt;/ul>
-&lt;p>在列存储的情形下，有两种方法标识tuple：定长offset（每个attribute大小一样）、embedded_tuple_id。&lt;/p></content><category scheme="https://berylyvos.icu/categories/cmu15-445/" term="CMU15-445" label="CMU15-445"/><category scheme="https://berylyvos.icu/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" term="数据库" label="数据库"/><category scheme="https://berylyvos.icu/tags/%E7%AC%94%E8%AE%B0/" term="笔记" label="笔记"/></entry><entry><title type="text">简单做个BitTorrent客户端</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/gorrent/"/><id>https://berylyvos.icu/posts/gorrent/</id><updated>2023-10-04T15:44:10+00:00</updated><published>2022-11-17T11:15:54+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">功能 多文件torrent下载 支持UDP/HTTP Tracker 支持DHT，PeX，磁力链接 Gol……</summary><content type="html">&lt;h1 id="功能">功能&lt;/h1>
+&lt;p>在列存储的情形下，有两种方法标识tuple：定长offset（每个attribute大小一样）、embedded_tuple_id。&lt;/p></content><category scheme="https://berylyvos.icu/categories/cmu15-445/" term="CMU15-445" label="CMU15-445"/><category scheme="https://berylyvos.icu/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" term="数据库" label="数据库"/><category scheme="https://berylyvos.icu/tags/%E7%AC%94%E8%AE%B0/" term="笔记" label="笔记"/></entry><entry><title type="text">简单做个BitTorrent客户端</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/gorrent/"/><id>https://berylyvos.icu/posts/gorrent/</id><updated>2023-10-07T11:47:27+00:00</updated><published>2022-11-17T11:15:54+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">功能 多文件torrent下载 支持UDP/HTTP Tracker 支持DHT，PeX，磁力链接 Gol……</summary><content type="html">&lt;h1 id="功能">功能&lt;/h1>
 &lt;ul>
 &lt;li>多文件torrent下载&lt;/li>
 &lt;li>支持UDP/HTTP Tracker&lt;/li>
@@ -688,7 +770,7 @@ tuple 的元数据包含：&lt;/p>
 &lt;li>&lt;a href="https://blog.jse.li/posts/torrent">Building a BitTorrent client from the ground up in Go&lt;/a>&lt;/li>
 &lt;li>&lt;a href="http://bittorrent.org/beps/bep_0015.html">BEP-15: UDP Tracker Protocol for BitTorrent&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://lifehacker.com/bittorrent-s-future-dht-pex-and-magnet-links-explain-5411311">BitTorrent’s Future: DHT, PEX, and Magnet Links Explained&lt;/a>&lt;/li>
-&lt;/ul></content><category scheme="https://berylyvos.icu/categories/%E7%8E%A9/" term="玩" label="玩"/><category scheme="https://berylyvos.icu/tags/golang/" term="Golang" label="Golang"/><category scheme="https://berylyvos.icu/tags/bittorrent/" term="BitTorrent" label="BitTorrent"/></entry><entry><title type="text">void kernel</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/hello-world/"/><id>https://berylyvos.icu/posts/hello-world/</id><updated>2023-10-04T15:44:10+00:00</updated><published>2022-11-11T01:38:56+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">Hello Okay, this is Crazy. void kernel 1 2 3 4 ++++++++++[&amp;gt;+++++++&amp;gt;+++++++++++&amp;gt;+++&amp;lt;&amp;lt;&amp;lt;-] &amp;gt;++++++++.&amp;gt;+.&amp;gt;++.&amp;lt;&amp;lt;-------.&amp;gt;------.+++++ ++++.------.&amp;gt;.&amp;lt;&amp;lt;-.&amp;gt;+++++++++.----------- -------.++++++++.&amp;gt;.&amp;lt;&amp;lt;+++++++.&amp;gt;------.&amp;gt;+. Good -2147483648 AcWing 291. 蒙德里安的梦想 求把 $N×M$ 的棋盘分割成若干个……</summary><content type="html">&lt;h1 id="hello">Hello&lt;/h1>
+&lt;/ul></content><category scheme="https://berylyvos.icu/categories/%E7%8E%A9/" term="玩" label="玩"/><category scheme="https://berylyvos.icu/tags/golang/" term="Golang" label="Golang"/><category scheme="https://berylyvos.icu/tags/bittorrent/" term="BitTorrent" label="BitTorrent"/></entry><entry><title type="text">void kernel</title><link rel="alternate" type="text/html" href="https://berylyvos.icu/posts/hello-world/"/><id>https://berylyvos.icu/posts/hello-world/</id><updated>2023-10-07T11:47:27+00:00</updated><published>2022-11-11T01:38:56+08:00</published><author><name>Shingo</name><uri>https://berylyvos.icu/</uri><email>berylyvos@gmail.com</email></author><rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights><summary type="html">Hello Okay, this is Crazy. void kernel 1 2 3 4 ++++++++++[&amp;gt;+++++++&amp;gt;+++++++++++&amp;gt;+++&amp;lt;&amp;lt;&amp;lt;-] &amp;gt;++++++++.&amp;gt;+.&amp;gt;++.&amp;lt;&amp;lt;-------.&amp;gt;------.+++++ ++++.------.&amp;gt;.&amp;lt;&amp;lt;-.&amp;gt;+++++++++.----------- -------.++++++++.&amp;gt;.&amp;lt;&amp;lt;+++++++.&amp;gt;------.&amp;gt;+. Good -2147483648 AcWing 291. 蒙德里安的梦想 求把 $N×M$ 的棋盘分割成若干个……</summary><content type="html">&lt;h1 id="hello">Hello&lt;/h1>
 &lt;hr>
 &lt;p>Okay,&lt;br>
 this is Crazy.&lt;/p>
